@@ -1,5 +1,6 @@
 // ── Email Kit Modal ─────────────────────────────────────────────────────────
 import React, { useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 function EmailKitModal({ business, onClose }) {
   const [emails, setEmails] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,7 @@ function EmailKitModal({ business, onClose }) {
   const handleGenerate = async () => {
     setLoading(true); setError(null); setEmails(null);
     try {
-      const res = await fetch("/api/emails/generate", {
+      const res = await fetch(`${API_URL}/api/emails/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ business })
@@ -52,7 +53,7 @@ function EmailKitModal({ business, onClose }) {
     try {
       const subject = keys.find(k => k.key === key).label;
       const html = emails[key];
-      const res = await fetch("/api/emails/send", {
+      const res = await fetch(`${API_URL}/api/emails/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to: sendTo, subject, html })
@@ -1801,7 +1802,7 @@ function PromptEditor({ styleConfig, onUpdate, locked, onSignIn }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post("/api/style", { prompt, current: styleConfig });
+      const res = await axios.post(`${API_URL}/api/style`, { prompt, current: styleConfig });
       if (res.data && typeof res.data === "object" && res.data.primary_color) {
         onUpdate(prev => ({ ...prev, ...res.data }));
         setSuccess(true);
@@ -1988,7 +1989,7 @@ function WebsitePreview({ data, onGenerateAnother, user, styleConfig, onSignIn }
     setDeployError(null);
     setLinkCopied(false);
     try {
-      const res = await axios.post("/api/deploy", { businessId: data.businessId });
+      const res = await axios.post(`${API_URL}/api/deploy`, { businessId: data.businessId });
       setDeployedUrl(res.data.url);
     } catch (err) {
       console.error("Deploy error:", err.response?.data || err.message);
@@ -3565,7 +3566,7 @@ export default function App() {
       const enrichedIdea = locationParts.length
         ? `${idea.trim()} [Target market: ${locationParts.join(", ")}]`
         : idea.trim();
-      const res = await axios.post("/api/generate", { idea: enrichedIdea, user_id: user?.id, businessId: result?.businessId });
+      const res = await axios.post(`${API_URL}/api/generate`, { idea: enrichedIdea, user_id: user?.id, businessId: result?.businessId });
       setResult(res.data);
     } catch (err) {
       console.error("ERROR:", err);
@@ -3591,7 +3592,7 @@ export default function App() {
     try {
       const locationParts = [profile?.city, profile?.state, profile?.country].filter(Boolean);
       const enriched = locationParts.length ? `${chosenIdea.trim()} [Target market: ${locationParts.join(', ')}]` : chosenIdea.trim();
-      const genRes = await axios.post('/api/generate', { idea: enriched, user_id: user?.id });
+      const genRes = await axios.post(`${API_URL}/api/generate`, { idea: enriched, user_id: user?.id });
       const data = genRes.data;
       setResult(data);
       setLaunchProgress(18);
@@ -3609,7 +3610,7 @@ export default function App() {
       await new Promise(r => setTimeout(r, 900));
       setLaunchProgress(84);
       setLaunchStep(6); sound.tick(); haptic.step();
-      const deployRes = await axios.post('/api/deploy', { businessId: data.businessId });
+      const deployRes = await axios.post(`${API_URL}/api/deploy`, { businessId: data.businessId });
       const deployedUrl = deployRes.data.url;
       setLaunchProgress(100);
       sound.success(); haptic.success();
@@ -3630,7 +3631,7 @@ export default function App() {
     try {
       const locationParts = [profile?.city, profile?.state, profile?.country].filter(Boolean);
       const enriched = locationParts.length ? `${chosenIdea.trim()} [Target market: ${locationParts.join(', ')}]` : chosenIdea.trim();
-      const res = await axios.post('/api/generate', { idea: enriched, user_id: user?.id });
+      const res = await axios.post(`${API_URL}/api/generate`, { idea: enriched, user_id: user?.id });
       setResult(res.data);
     } catch (err) {
       console.error(err);

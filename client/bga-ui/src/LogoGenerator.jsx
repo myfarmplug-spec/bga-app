@@ -15,7 +15,8 @@ export default function LogoGenerator({ business }) {
 
   const handleGenerate = async () => {
     setLoading(true);
-    const res = await fetch("/api/logo/generate", {
+    const API_URL = import.meta.env.VITE_API_URL;
+    const res = await fetch(`${API_URL}/api/logo/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ business }),

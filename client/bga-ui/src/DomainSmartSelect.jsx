@@ -51,7 +51,8 @@ export default function DomainSmartSelect({ onSelect }) {
   const checkDomain = async (domain) => {
     setStatus(s => ({ ...s, [domain]: "checking" }));
     try {
-      const res = await fetch("/api/domain/check", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/domain/check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ domain }),
@@ -66,17 +67,18 @@ export default function DomainSmartSelect({ onSelect }) {
   };
 
   const pollStatus = (domain) => {
+    const API_URL = import.meta.env.VITE_API_URL;
     let elapsed = 0;
     pollRef.current = setInterval(async () => {
       elapsed += 5;
       try {
-        const res = await fetch(`/api/domain/status?domain=${domain}`);
+        const res = await fetch(`${API_URL}/api/domain/status?domain=${domain}`);
         const data = await res.json();
         if (data.configured) {
           clearInterval(pollRef.current);
           setDomainStatus("live");
           setConnectSuccess(true);
-          fetch("/api/domain/mark-live", {
+          fetch(`${API_URL}/api/domain/mark-live`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ domain }),
@@ -100,13 +102,13 @@ export default function DomainSmartSelect({ onSelect }) {
     setDnsInstructions(null);
     setDomainStatus("buying");
     try {
-      await fetch("/api/domain/purchase", {
+      await fetch(`${API_URL}/api/domain/purchase`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ domain }),
       });
       setDomainStatus("connecting");
-      await fetch("/api/domain/connect", {
+      await fetch(`${API_URL}/api/domain/connect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ domain }),
