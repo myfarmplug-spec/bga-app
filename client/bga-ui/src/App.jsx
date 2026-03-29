@@ -1,5 +1,5 @@
 // ── Email Kit Modal ─────────────────────────────────────────────────────────
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
 function EmailKitModal({ business, onClose }) {
   const [emails, setEmails] = useState(null);
@@ -106,7 +106,6 @@ function EmailKitModal({ business, onClose }) {
     </div>
   );
 }
-import { useState, useEffect, useRef } from "react";
 import UpgradeModal from "./UpgradeModal";
 import axios from "axios";
 import { supabase } from "./supabase";
