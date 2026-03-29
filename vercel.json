@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "cd client/bga-ui && npm install && npm run build",
+  "outputDirectory": "client/bga-ui/dist",
   "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
