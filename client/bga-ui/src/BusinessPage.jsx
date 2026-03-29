@@ -70,9 +70,12 @@ const divider = {
 /* ── main component ──────────────────────────────────────────────────────── */
 export default function BusinessPage() {
   const [biz, setBiz] = useState(null);
-  const [meta, setMeta] = useState({ name: "", tagline: "" });
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [name, setName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [description, setDescription] = useState("");
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const parts = window.location.pathname.replace(/^\//, "").split("/");
@@ -81,9 +84,13 @@ export default function BusinessPage() {
 
     fetch(`${API_URL}/api/business/${id}`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(payload => {
-        setMeta({ name: payload.name || "", tagline: payload.tagline || "" });
-        setBiz(payload.data || {});
+      .then(data => {
+        setName(data.name || "");
+        setTagline(data.tagline || "");
+        setDescription(data.description || "");
+        setProducts(Array.isArray(data.products) ? data.products : []);
+        setBiz(data.data || {});
+        console.log("BUSINESS DATA:", data);
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
@@ -105,26 +112,18 @@ export default function BusinessPage() {
     </div>
   );
 
-  if (!biz) return null;
+  // Always render the business page after loading, even if biz is empty
 
-  /* ── data extraction with safe fallbacks ── */
-  const name     = meta.name || biz.selected_name || "Our Business";
-  const tagline  = meta.tagline || biz.tagline || "";
-  const website  = biz.website   || {};
-  const hero     = website.hero  || {};
-  const about    = website.about || hero.subtext       || `${name} offers quality products and services. We're committed to making every customer happy.`;
-  const products = (website.products || []).slice(0, 5);
-  const contact  = website.contact || {};
-  const phone    = contact.phone   || "";
+  // Contact info (optional, fallback to empty)
+  const website = biz.website || {};
+  const contact = website.contact || {};
+  const phone = contact.phone || "";
   const location = contact.location || "";
-
   const waNum  = toWaNumber(phone);
   const waLink = waNum ? `https://wa.me/${waNum}` : null;
 
-  /* ── render ── */
   return (
     <div style={{ minHeight: "100vh", background: S.bg, fontFamily: S.font, color: S.text }}>
-
       {/* ── HERO ────────────────────────────────────────────────────────── */}
       <div style={{ background: S.card, borderBottom: `1px solid ${S.border}`, padding: "52px 24px 44px" }}>
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -162,7 +161,7 @@ export default function BusinessPage() {
         <div style={{ paddingTop: 40, ...divider }}>
           <div style={label}>About Us</div>
           <p style={{ fontSize: 16, color: "#374151", lineHeight: 1.8, margin: 0 }}>
-            {about}
+            {description}
           </p>
           {location && (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 16, color: S.muted, fontSize: 14 }}>

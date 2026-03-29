@@ -74,7 +74,7 @@ app.get("/api/business/:id", async (req, res) => {
 
   const { data, error } = await supabase
     .from("businesses")
-    .select("id, name, tagline, deployed_url, data")
+    .select("id, name, tagline, description, products, deployed_url, data")
     .eq("id", id)
     .single();
 
@@ -87,8 +87,18 @@ app.get("/api/business/:id", async (req, res) => {
   const biz = data.data || {};
   const name    = data.name    || biz.selected_name || null;
   const tagline = data.tagline || biz.tagline        || null;
+  const description = data.description || biz.website?.about || biz.description || "";
+  const products = data.products || biz.website?.products || biz.products || [];
 
-  res.json({ id: data.id, name, tagline, deployed_url: data.deployed_url, data: biz });
+  res.json({
+    id: data.id,
+    name,
+    tagline,
+    description,
+    products,
+    deployed_url: data.deployed_url,
+    data: biz
+  });
 });
 
 // --- DOMAIN MARK LIVE (PAID) ---

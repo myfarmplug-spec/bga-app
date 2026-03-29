@@ -143,19 +143,28 @@ Instructions:
     let resolvedBusinessId = businessId || null;
 
     if (businessId) {
-      // Existing business: update name/tagline/data + memory history
+      // Existing business: update with generated data, using the same businessId
       const { data: bizData, error: bizErr } = await supabase
         .from("businesses").select("memory").eq("id", businessId).single();
       const mem = getDefaultMemory();
       if (!bizErr && bizData?.memory) Object.assign(mem, bizData.memory);
       mem.history = [{ action: "generate", idea, timestamp: Date.now() }, ...(mem.history || [])];
+      // Use result.selected_name as result.name if present, else fallback
+      const name = result.name || result.selected_name || "Untitled";
+      const tagline = result.tagline || "";
+      const description = result.description || result.website?.about || "";
+      const products = result.products || result.website?.products || [];
+      // Log update
+      console.log("Updating business:", businessId, result);
       await supabase.from("businesses").update({
-        name:         result.selected_name || "Untitled",
-        tagline:      result.tagline       || "",
-        data:         result,
+        name,
+        tagline,
+        description,
+        idea,
+        data: result,
         is_anonymous: !user_id,
-        user_id:      user_id || null,
-        memory:       mem,
+        user_id: user_id || null,
+        memory: mem,
       }).eq("id", businessId);
     } else {
       // New business: always save so we always have a businessId to deploy
@@ -163,8 +172,10 @@ Instructions:
         .from("businesses")
         .insert([{
           user_id: user_id || null,
-          name:    result.selected_name || "Untitled",
+          name:    result.selected_name || result.name || "Untitled",
           tagline: result.tagline       || "",
+          description:  result.description || result.website?.about || "",
+          products:     result.products || result.website?.products || [],
           data:    result,
         }])
         .select("id")
