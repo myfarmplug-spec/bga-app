@@ -19,7 +19,18 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
+  : ["http://localhost:5173", "http://localhost:5174"];
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // allow non-browser requests (curl, Postman) and whitelisted origins
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: "2mb" }));
 
 // ── Rate limiting — protect AI endpoints from abuse ──────────────────────────
@@ -34,7 +45,7 @@ app.use("/api/generate", generateLimiter);
 app.use("/api/emails",   generateLimiter);
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({ status: "ok", env: process.env.NODE_ENV || "development" });
 });
 
 // --- DOMAIN MARK LIVE (PAID) ---
@@ -180,6 +191,6 @@ app.use("/api/style",    styleRoute);
 // Email Kit routes
 app.use("/api/emails", emailsRoute);
 
-app.listen(3000, () => {
-  console.log("BGA running on http://localhost:3000");
+app.listen(PORT, () => {
+  console.log(`[BGA] Server running on port ${PORT} (${process.env.NODE_ENV || "development"})`);
 });

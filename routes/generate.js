@@ -91,6 +91,7 @@ function getDefaultMemory() {
 router.post("/", async (req, res) => {
   try {
     const { idea, profile, businessId, memory: clientMemory, user_id } = req.body;
+    console.log(`[generate] idea="${idea?.slice(0, 60)}" user_id=${user_id || "guest"} businessId=${businessId || "new"}`);
     // Fetch memory from DB if businessId provided
     let memory = getDefaultMemory();
     if (businessId) {
@@ -164,11 +165,12 @@ Instructions:
       if (!saveErr && saved) resolvedBusinessId = saved.id;
     }
 
+    console.log(`[generate] Done — name="${result.selected_name}" businessId=${resolvedBusinessId}`);
     res.json({ ...result, businessId: resolvedBusinessId });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Something broke" });
+    console.error("[generate] Error:", error.message);
+    res.status(500).json({ error: "Generation failed. Please try again." });
   }
 });
 

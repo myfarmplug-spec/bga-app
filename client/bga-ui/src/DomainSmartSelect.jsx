@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function cleanInput(str) {
   return str.toLowerCase().replace(/[^a-z0-9]/g, "").trim();
 }
@@ -51,7 +53,6 @@ export default function DomainSmartSelect({ onSelect }) {
   const checkDomain = async (domain) => {
     setStatus(s => ({ ...s, [domain]: "checking" }));
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
       const res = await fetch(`${API_URL}/api/domain/check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +68,6 @@ export default function DomainSmartSelect({ onSelect }) {
   };
 
   const pollStatus = (domain) => {
-    const API_URL = import.meta.env.VITE_API_URL;
     let elapsed = 0;
     pollRef.current = setInterval(async () => {
       elapsed += 5;
