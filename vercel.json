@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd client/bga-ui && npm install && npm run build",
-  "outputDirectory": "client/bga-ui/dist",
-  "installCommand": "echo skip",
-  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
