@@ -48,6 +48,25 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", env: process.env.NODE_ENV || "development" });
 });
 
+// ── Create anonymous business — called before generate so we always have an ID ─
+app.post("/api/create-anon-business", async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("businesses")
+      .insert([{ name: "Untitled", is_anonymous: true }])
+      .select("id")
+      .single();
+    if (error) {
+      console.error("[create-anon-business]", error.message);
+      return res.status(500).json({ error: error.message });
+    }
+    console.log(`[create-anon-business] Created businessId=${data.id}`);
+    res.json({ businessId: data.id });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create business" });
+  }
+});
+
 // --- DOMAIN MARK LIVE (PAID) ---
 app.post("/api/domain/mark-live", async (req, res) => {
   const { domain } = req.body;

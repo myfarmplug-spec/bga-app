@@ -143,13 +143,20 @@ Instructions:
     let resolvedBusinessId = businessId || null;
 
     if (businessId) {
-      // Existing business: update memory history (single fetch — no duplicate)
+      // Existing business: update name/tagline/data + memory history
       const { data: bizData, error: bizErr } = await supabase
         .from("businesses").select("memory").eq("id", businessId).single();
       const mem = getDefaultMemory();
       if (!bizErr && bizData?.memory) Object.assign(mem, bizData.memory);
       mem.history = [{ action: "generate", idea, timestamp: Date.now() }, ...(mem.history || [])];
-      await supabase.from("businesses").update({ memory: mem }).eq("id", businessId);
+      await supabase.from("businesses").update({
+        name:         result.selected_name || "Untitled",
+        tagline:      result.tagline       || "",
+        data:         result,
+        is_anonymous: !user_id,
+        user_id:      user_id || null,
+        memory:       mem,
+      }).eq("id", businessId);
     } else {
       // New business: always save so we always have a businessId to deploy
       const { data: saved, error: saveErr } = await supabase

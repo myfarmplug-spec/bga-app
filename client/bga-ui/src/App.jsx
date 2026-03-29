@@ -3617,9 +3617,21 @@ export default function App() {
     setLaunchError(null);
     sound.init(); haptic.start();
     try {
+      // ── Get or create a persistent businessId (works for guests too) ──────────
+      let sessionBusinessId = user?.id ? null : localStorage.getItem("businessId");
+      if (!sessionBusinessId && !user?.id) {
+        const anonRes = await axios.post(`${API_URL}/api/create-anon-business`);
+        sessionBusinessId = anonRes.data.businessId;
+        if (sessionBusinessId) localStorage.setItem("businessId", sessionBusinessId);
+      }
+
       const locationParts = [profile?.city, profile?.state, profile?.country].filter(Boolean);
       const enriched = locationParts.length ? `${chosenIdea.trim()} [Target market: ${locationParts.join(', ')}]` : chosenIdea.trim();
-      const genRes = await axios.post(`${API_URL}/api/generate`, { idea: enriched, user_id: user?.id });
+      const genRes = await axios.post(`${API_URL}/api/generate`, {
+        idea: enriched,
+        user_id: user?.id || null,
+        businessId: sessionBusinessId || null,
+      });
       const data = genRes.data;
       setResult(data);
       setLaunchProgress(18);
