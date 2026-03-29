@@ -150,19 +150,23 @@ Instructions:
       if (!bizErr && bizData?.memory) Object.assign(mem, bizData.memory);
       mem.history = [{ action: "generate", idea, timestamp: Date.now() }, ...(mem.history || [])];
       await supabase.from("businesses").update({ memory: mem }).eq("id", businessId);
-    } else if (user_id) {
-      // New business: save to Supabase so it appears in Dashboard
+    } else {
+      // New business: always save so we always have a businessId to deploy
       const { data: saved, error: saveErr } = await supabase
         .from("businesses")
         .insert([{
-          user_id,
+          user_id: user_id || null,
           name:    result.selected_name || "Untitled",
           tagline: result.tagline       || "",
           data:    result,
         }])
         .select("id")
         .single();
-      if (!saveErr && saved) resolvedBusinessId = saved.id;
+      if (saveErr) {
+        console.error("[generate] Supabase insert error:", saveErr.message);
+      } else if (saved) {
+        resolvedBusinessId = saved.id;
+      }
     }
 
     console.log(`[generate] Done — name="${result.selected_name}" businessId=${resolvedBusinessId}`);
