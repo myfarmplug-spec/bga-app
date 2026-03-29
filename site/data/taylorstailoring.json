@@ -1,0 +1,45 @@
+{
+  "business_names": [
+    "Taylor's Tailoring",
+    "Taylor Made Styles",
+    "Taylor's Fashion Hub",
+    "Taylor's Couture",
+    "The Tailored Touch"
+  ],
+  "selected_name": "Taylor's Tailoring",
+  "tagline": "Your Style, Our Craft",
+  "brand": {
+    "primary_color": "#FF5733",
+    "secondary_color": "#C70039",
+    "style": "Modern and Chic"
+  },
+  "website": {
+    "hero": {
+      "headline": "Perfectly Tailored Just for You",
+      "subtext": "Look your best with custom-made outfits that fit like a glove.",
+      "cta": "Order on WhatsApp"
+    },
+    "about": "At Taylor's Tailoring, we specialize in custom-made clothing that reflects your unique style. Whether it's for a special occasion or everyday wear, we ensure every piece is crafted with precision and care. Let us help you look your best!",
+    "products": [
+      {
+        "name": "Custom Suit",
+        "price": "25,000",
+        "description": "Step into style with our tailored suits. Perfect for weddings, corporate events, or any occasion where you want to impress."
+      },
+      {
+        "name": "Traditional Attire",
+        "price": "15,000",
+        "description": "Celebrate your heritage with our beautifully crafted traditional outfits. Made to fit and designed to stand out."
+      },
+      {
+        "name": "Casual Wear",
+        "price": "10,000",
+        "description": "Stay comfortable and stylish with our casual wear. Perfect for everyday outings or relaxed weekends."
+      }
+    ],
+    "contact": {
+      "phone": "08123456789",
+      "location": "Lagos, Nigeria"
+    }
+  }
+}

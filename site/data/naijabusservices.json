@@ -1,0 +1,45 @@
+{
+  "business_names": [
+    "Naija Bus Services",
+    "Easy Ride Transport",
+    "Lagos Bus Connect",
+    "Swift Bus Transit",
+    "Go Bus Nigeria"
+  ],
+  "selected_name": "Naija Bus Services",
+  "tagline": "Your Journey, Our Priority",
+  "brand": {
+    "primary_color": "#FFB300",
+    "secondary_color": "#3E2723",
+    "style": "Modern and Friendly"
+  },
+  "website": {
+    "hero": {
+      "headline": "Reliable Bus Services Across Nigeria",
+      "subtext": "Travel comfortably and safely with us.",
+      "cta": "Order on WhatsApp"
+    },
+    "about": "Naija Bus Services is dedicated to providing safe, reliable, and affordable transportation across Nigeria. With a fleet of well-maintained buses, we ensure our passengers enjoy a smooth ride.",
+    "products": [
+      {
+        "name": "Lagos to Abuja",
+        "price": "₦8,000",
+        "description": "Travel from Lagos to Abuja in comfort. Our buses are equipped with air conditioning and free Wi-Fi."
+      },
+      {
+        "name": "Ibadan to Lagos",
+        "price": "₦4,500",
+        "description": "Enjoy a quick and easy ride from Ibadan to Lagos. Book your seat and experience our excellent service."
+      },
+      {
+        "name": "Port Harcourt to Enugu",
+        "price": "₦5,500",
+        "description": "Travel from Port Harcourt to Enugu with our friendly drivers. Safety and comfort are our top priorities."
+      }
+    ],
+    "contact": {
+      "phone": "08012345678",
+      "location": "Lagos, Nigeria"
+    }
+  }
+}

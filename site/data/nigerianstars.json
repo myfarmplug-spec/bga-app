@@ -1,0 +1,45 @@
+{
+  "business_names": [
+    "Nigerian Stars",
+    "FanZone Nigeria",
+    "MyFanSpace",
+    "VIP Connect Nigeria",
+    "Exclusive Content NG"
+  ],
+  "selected_name": "Nigerian Stars",
+  "tagline": "Your favorite stars, just a click away!",
+  "brand": {
+    "primary_color": "#FF4500",
+    "secondary_color": "#FFD700",
+    "style": "Modern and vibrant"
+  },
+  "website": {
+    "hero": {
+      "headline": "Join the Exclusive Fan Experience",
+      "subtext": "Connect with your favorite Nigerian stars and enjoy unique content.",
+      "cta": "Order on WhatsApp"
+    },
+    "about": "Nigerian Stars is the ultimate platform where fans can interact with their favorite influencers and entertainers. Get exclusive access to behind-the-scenes content, live chats, and more!",
+    "products": [
+      {
+        "name": "Monthly Subscription",
+        "price": "₦5,000",
+        "description": "Get access to all exclusive content from your favorite stars every month. Don't miss out!"
+      },
+      {
+        "name": "Personalized Video Message",
+        "price": "₦10,000",
+        "description": "Receive a personalized video message from your favorite star. Perfect for birthdays or special occasions!"
+      },
+      {
+        "name": "Live Chat Session",
+        "price": "₦15,000",
+        "description": "Book a live chat session with a star of your choice. Ask questions and get to know them better!"
+      }
+    ],
+    "contact": {
+      "phone": "+234 701 234 5678",
+      "location": "Lagos, Nigeria"
+    }
+  }
+}

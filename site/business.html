@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading...</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #06060e; color: #e2e8f0; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(10,10,20,0.9);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo {
+      font-size: 20px; font-weight: 900; letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #f1f5f9 30%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-tagline { font-size: 13px; color: #6b7280; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-badge {
+      font-size: 11px; font-weight: 600; color: #a78bfa;
+      background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3);
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 100px 24px 80px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(109,40,217,0.18) 0%, transparent 70%);
+    }
+    .hero-title {
+      font-size: clamp(36px, 6vw, 68px); font-weight: 900;
+      line-height: 1.1; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #f1f5f9 40%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 19px); color: #9ca3af;
+      line-height: 1.7; max-width: 600px; margin: 0 auto 36px;
+    }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: #fff; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(37,211,102,0.35);
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(37,211,102,0.45); }
+
+    /* SECTIONS */
+    section { padding: 72px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 700; color: #6b7280;
+      letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px;
+    }
+    .about-text { font-size: 17px; color: #9ca3af; line-height: 1.8; max-width: 720px; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
+      margin: 0 24px;
+    }
+
+    /* PRODUCTS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(139,92,246,0.04));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 24px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: rgba(139,92,246,0.4); transform: translateY(-3px); }
+    .card-name { font-size: 15px; font-weight: 600; color: #e2e8f0; }
+    .card-price {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .card-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
+
+    /* CONTACT */
+    .contact-grid { display: flex; flex-wrap: wrap; gap: 14px; }
+    .contact-item {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px; padding: 14px 20px;
+      font-size: 14px; color: #e2e8f0; font-weight: 500;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .contact-item:hover { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.06); }
+    .contact-item span:first-child { font-size: 20px; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 40px 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px; color: #374151;
+    }
+    footer a { color: #6b7280; border-bottom: 1px solid rgba(107,114,128,0.3); }
+
+    /* LOADER */
+    .loader {
+      height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+    }
+    .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(139,92,246,0.2);
+      border-top-color: #a78bfa;
+      animation: spin 0.8s linear infinite;
+    }
+    .loader-text { font-size: 14px; color: #6b7280; }
+
+    /* NOT FOUND */
+    .not-found {
+      height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px; text-align: center;
+      padding: 24px;
+    }
+    .not-found-icon { font-size: 48px; }
+    .not-found h1 { font-size: 24px; font-weight: 700; color: #f1f5f9; }
+    .not-found p { font-size: 14px; color: #6b7280; line-height: 1.6; }
+    .not-found a {
+      margin-top: 8px;
+      display: inline-block; padding: 10px 24px;
+      background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 10px; font-size: 13px; color: #a78bfa; font-weight: 600;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease both; }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 72px 20px 60px; }
+      section { padding: 56px 20px; }
+      .divider { margin: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+  (function () {
+    const root = document.getElementById("root");
+
+    function showLoader() {
+      root.innerHTML = '<div class="loader"><div class="spinner"></div><div class="loader-text">Loading business...</div></div>';
+    }
+
+    function showNotFound(slug) {
+      root.innerHTML = [
+        '<div class="not-found fade-in">',
+        '  <div class="not-found-icon">🏢</div>',
+        '  <h1>Business not found</h1>',
+        '  <p>We couldn\'t find a business at <strong>/' + slug + '</strong>.<br/>It may have been removed or the link is incorrect.</p>',
+        '  <a href="/">← Back to BGA</a>',
+        '</div>',
+      ].join("");
+    }
+
+    function render(data) {
+      const name     = data.selected_name || "";
+      const tagline  = data.tagline       || "";
+      const website  = data.website       || {};
+      const hero     = website.hero       || {};
+      const products = website.products   || [];
+      const contact  = website.contact    || {};
+
+      document.title = name;
+
+      const waPhone = contact.phone ? contact.phone.replace(/\D/g, "") : "";
+
+      const productCards = products.map(p => [
+        '<div class="card">',
+        '  <div class="card-name">' + esc(p.name || "") + '</div>',
+        '  <div class="card-price">' + esc(p.price || "") + '</div>',
+        p.description ? '  <div class="card-desc">' + esc(p.description) + '</div>' : "",
+        '</div>',
+      ].join("")).join("");
+
+      const contactItems = [
+        contact.phone    ? '<a class="contact-item" href="https://wa.me/' + waPhone + '" target="_blank"><span>📞</span><span>' + esc(contact.phone) + '</span></a>' : "",
+        contact.location ? '<div class="contact-item"><span>📍</span><span>' + esc(contact.location) + '</span></div>' : "",
+        contact.email    ? '<a class="contact-item" href="mailto:' + esc(contact.email) + '"><span>✉️</span><span>' + esc(contact.email) + '</span></a>' : "",
+      ].filter(Boolean).join("");
+
+      const html = [
+        '<nav class="fade-in">',
+        '  <div class="nav-logo">' + esc(name) + '</div>',
+        '  <div class="nav-tagline">' + esc(tagline) + '</div>',
+        '  <div class="nav-badge">BGA</div>',
+        '</nav>',
+
+        '<div class="hero fade-in">',
+        '  <div class="hero-title">' + esc(hero.headline || name) + '</div>',
+        '  <div class="hero-sub">' + esc(hero.subtext || tagline) + '</div>',
+        waPhone
+          ? '<a class="cta-btn" href="https://wa.me/' + waPhone + '" target="_blank">💬 ' + esc(hero.cta || "Order on WhatsApp") + '</a>'
+          : (hero.cta ? '<span class="cta-btn" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 6px 24px rgba(124,58,237,0.4)">' + esc(hero.cta) + '</span>' : ""),
+        '</div>',
+
+        '<div class="divider"></div>',
+
+        website.about
+          ? '<section class="fade-in"><div class="section-label">About Us</div><div class="about-text">' + esc(website.about) + '</div></section><div class="divider"></div>'
+          : "",
+
+        products.length > 0
+          ? '<section class="fade-in"><div class="section-label">Products &amp; Services</div><div class="cards-grid">' + productCards + '</div></section><div class="divider"></div>'
+          : "",
+
+        contactItems
+          ? '<section class="fade-in"><div class="section-label">Contact</div><div class="contact-grid">' + contactItems + '</div></section>'
+          : "",
+
+        '<footer><a href="/">Powered by BGA — Business Generator Africa</a></footer>',
+      ].join("\n");
+
+      root.innerHTML = html;
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // --- Bootstrap ---
+    const slug = window.location.pathname.replace(/^\//, "").replace(/\/$/, "");
+
+    if (!slug) {
+      window.location.href = "/";
+      return;
+    }
+
+    showLoader();
+
+    fetch("/data/" + slug + ".json")
+      .then(res => {
+        if (!res.ok) throw new Error("not found");
+        return res.json();
+      })
+      .then(render)
+      .catch(() => showNotFound(slug));
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "business_names": [
+    "Fresh Farm Produce",
+    "Green Valley Farms",
+    "Harvest Hub",
+    "Nature's Bounty",
+    "Farm to Table"
+  ],
+  "selected_name": "Fresh Farm Produce",
+  "tagline": "Bringing the Farm Fresh to Your Doorstep",
+  "brand": {
+    "primary_color": "#4CAF50",
+    "secondary_color": "#FFC107",
+    "style": "Modern and Natural"
+  },
+  "website": {
+    "hero": {
+      "headline": "Get Fresh Produce Delivered to You!",
+      "subtext": "Quality fruits and vegetables straight from our farm.",
+      "cta": "Order on WhatsApp"
+    },
+    "about": "At Fresh Farm Produce, we are dedicated to providing you with the freshest, organic fruits and vegetables. Our produce is harvested daily to ensure you get the best quality right at your doorstep. We believe in supporting local farmers and promoting healthy eating.",
+    "products": [
+      {
+        "name": "Organic Tomatoes",
+        "price": "₦1,500",
+        "description": "Juicy and ripe organic tomatoes perfect for your stews and sauces."
+      },
+      {
+        "name": "Fresh Spinach",
+        "price": "₦800",
+        "description": "Nutritious spinach, freshly picked and ready for your salads or soups."
+      },
+      {
+        "name": "Sweet Potatoes",
+        "price": "₦1,200",
+        "description": "Delicious and healthy sweet potatoes, great for baking or boiling."
+      }
+    ],
+    "contact": {
+      "phone": "08012345678",
+      "location": "Ibadan, Oyo State"
+    }
+  }
+}

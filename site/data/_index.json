@@ -1,0 +1,27 @@
+[
+  {
+    "slug": "taylorstailoring",
+    "name": "Taylor's Tailoring",
+    "tagline": "Your Style, Our Craft"
+  },
+  {
+    "slug": "freshfarmproduce",
+    "name": "Fresh Farm Produce",
+    "tagline": "Bringing the Farm Fresh to Your Doorstep"
+  },
+  {
+    "slug": "nigerianstars",
+    "name": "Nigerian Stars",
+    "tagline": "Your favorite stars, just a click away!"
+  },
+  {
+    "slug": "naijabusservices",
+    "name": "Naija Bus Services",
+    "tagline": "Your Journey, Our Priority"
+  },
+  {
+    "slug": "testbiz",
+    "name": "TestBiz",
+    "tagline": "test"
+  }
+]
