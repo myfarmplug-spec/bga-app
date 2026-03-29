@@ -767,7 +767,7 @@ function LaunchExperience({ step, progress, error, onRetry, onDismiss }) {
 }
 
 // ── Launch success screen ──────────────────────────────────────────────────────
-function LaunchSuccessScreen({ data, deployedUrl, onClose, onLaunchAnother, onSignIn }) {
+function LaunchSuccessScreen({ data, deployedUrl, user, onClose, onLaunchAnother, onSignIn }) {
   const flyerRef = useRef(null);
   const logoRef1 = useRef(null);
   const logoRef2 = useRef(null);
@@ -967,6 +967,34 @@ function LaunchSuccessScreen({ data, deployedUrl, onClose, onLaunchAnother, onSi
                 Sign up free — get your live link
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Save prompt for guests who got a deployed URL */}
+        {!user && deployedUrl && (
+          <div style={{
+            borderRadius: "14px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            padding: "18px 20px",
+            display: "flex", flexDirection: "column", gap: "10px",
+          }}>
+            <div style={{ fontSize: "14px", fontWeight: "700", color: "#f1f5f9" }}>
+              Want to save and edit this business?
+            </div>
+            <div style={{ fontSize: "12px", color: "#6b7280", lineHeight: 1.6 }}>
+              Create a free account to keep your business, make changes, and manage everything from your dashboard.
+            </div>
+            <button
+              onClick={() => { onClose(); if (onSignIn) onSignIn(); }}
+              style={{
+                padding: "12px 16px", background: "#fff", color: "#111",
+                border: "none", borderRadius: "10px",
+                fontSize: "13px", fontWeight: "700", cursor: "pointer",
+              }}
+            >
+              Save my business — it's free →
+            </button>
           </div>
         )}
 
@@ -3240,7 +3268,7 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
             placeholder="e.g. shawarma spot in Port Harcourt"
             value={idea}
             onChange={e => setIdea(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && idea.trim() && (user ? handleLaunch() : onSignIn())}
+            onKeyDown={e => e.key === "Enter" && idea.trim() && handleLaunch()}
             style={{
               width: "100%", padding: "16px 18px", borderRadius: 10, boxSizing: "border-box",
               background: "#111", border: "1px solid #374151",
@@ -3250,7 +3278,7 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
 
           <button
             type="button"
-            onClick={user ? handleLaunch : onSignIn}
+            onClick={handleLaunch}
             disabled={launching || !idea.trim()}
             style={{
               width: "100%", marginTop: 12, padding: "16px", borderRadius: 10,
@@ -3264,8 +3292,6 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
           >
             {launching
               ? <><div style={{ width: 15, height: 15, border: "2px solid #374151", borderTop: "2px solid #6b7280", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} /> Building your business…</>
-              : !user
-              ? "Sign In & Generate Business →"
               : "Generate Business →"}
           </button>
 
@@ -3641,6 +3667,7 @@ export default function App() {
           <LaunchSuccessScreen
             data={launchResult.data}
             deployedUrl={launchResult.deployedUrl}
+            user={user}
             onClose={() => setLaunchResult(null)}
             onLaunchAnother={() => { setLaunchResult(null); setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
             onSignIn={() => { setLaunchResult(null); setAuthModal(true); }}
