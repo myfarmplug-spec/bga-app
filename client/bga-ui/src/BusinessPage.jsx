@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase } from "./supabase";
+
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 /* ── tiny inline icons — no extra deps ─────────────────────────────────── */
 function WaIcon() {
@@ -78,21 +79,14 @@ export default function BusinessPage() {
     const id = parts[0] === "site" ? parts[1] : parts[0];
     if (!id) { setNotFound(true); setLoading(false); return; }
 
-    supabase
-      .from("public_businesses")
-      .select("*")
-      .eq("id", id)
-      .single()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          setNotFound(true);
-        } else {
-          // public_businesses view coalesces name/tagline at the row level
-          setMeta({ name: data.name || "", tagline: data.tagline || "" });
-          setBiz(data.data || data);
-        }
-        setLoading(false);
-      });
+    fetch(`${API_URL}/api/business/${id}`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(payload => {
+        setMeta({ name: payload.name || "", tagline: payload.tagline || "" });
+        setBiz(payload.data || {});
+      })
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
   }, []);
 
   /* ── loading ── */
@@ -114,8 +108,8 @@ export default function BusinessPage() {
   if (!biz) return null;
 
   /* ── data extraction with safe fallbacks ── */
-  const name     = meta.name     || biz.selected_name || biz.name     || "Our Business";
-  const tagline  = meta.tagline  || biz.tagline        || "";
+  const name     = meta.name || biz.selected_name || "Our Business";
+  const tagline  = meta.tagline || biz.tagline || "";
   const website  = biz.website   || {};
   const hero     = website.hero  || {};
   const about    = website.about || hero.subtext       || `${name} offers quality products and services. We're committed to making every customer happy.`;

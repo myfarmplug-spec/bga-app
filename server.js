@@ -53,7 +53,7 @@ app.post("/api/create-anon-business", async (_req, res) => {
   try {
     const { data, error } = await supabase
       .from("businesses")
-      .insert([{ name: "Untitled", is_anonymous: true }])
+      .insert([{ is_anonymous: true }])
       .select("id")
       .single();
     if (error) {
@@ -65,6 +65,30 @@ app.post("/api/create-anon-business", async (_req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Failed to create business" });
   }
+});
+
+// ── Public business data — used by /site/:id page ────────────────────────────
+app.get("/api/business/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ error: "Missing id" });
+
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("id, name, tagline, deployed_url, data")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    console.error("[api/business]", error?.message || "not found");
+    return res.status(404).json({ error: "Business not found" });
+  }
+
+  // Merge top-level columns with the generated JSON — name/tagline take priority
+  const biz = data.data || {};
+  const name    = data.name    || biz.selected_name || null;
+  const tagline = data.tagline || biz.tagline        || null;
+
+  res.json({ id: data.id, name, tagline, deployed_url: data.deployed_url, data: biz });
 });
 
 // --- DOMAIN MARK LIVE (PAID) ---
