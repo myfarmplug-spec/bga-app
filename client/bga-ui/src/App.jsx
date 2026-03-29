@@ -3207,70 +3207,64 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
 
   return (
     <div style={{
-      minHeight: "100vh", backgroundColor: "#06060e", color: "#e2e8f0",
+      minHeight: "100vh", backgroundColor: "#f6f7f8", color: "#111827",
       fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-      display: "flex", flexDirection: "column", position: "relative", overflow: "hidden",
+      display: "flex", flexDirection: "column",
     }}>
-      {/* Ambient orbs */}
-      <div style={{ position: "absolute", top: -120, left: -80, width: 500, height: 500, borderRadius: "50%", filter: "blur(90px)", background: "radial-gradient(circle, rgba(109,40,217,0.22) 0%, transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: -100, right: -60, width: 420, height: 420, borderRadius: "50%", filter: "blur(80px)", background: "radial-gradient(circle, rgba(79,70,229,0.16) 0%, transparent 70%)", pointerEvents: "none" }} />
-
       {/* Top bar */}
       <div style={{
-        height: 56, padding: "0 28px", display: "flex", alignItems: "center",
-        justifyContent: "space-between", position: "relative", zIndex: 10,
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        backgroundColor: "rgba(6,6,14,0.8)", backdropFilter: "blur(20px)",
+        height: 56, padding: "0 20px", display: "flex", alignItems: "center",
+        justifyContent: "space-between", backgroundColor: "#fff",
+        borderBottom: "1px solid #e5e7eb",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff", boxShadow: "0 2px 12px rgba(124,58,237,0.5)" }}>B</div>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#f1f5f9", letterSpacing: "0.02em" }}>BGA</span>
-          <span style={{ fontSize: 12, color: "#374151", marginLeft: 4 }}>Business Generator Africa</span>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "#fff" }}>B</div>
+          <span style={{ fontSize: 15, fontWeight: 800, color: "#111827" }}>BGA</span>
+          <span style={{ fontSize: 12, color: "#9ca3af", marginLeft: 2 }}>Business Generator Africa</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {user ? (
             <>
-              <div style={{ width: 26, height: 26, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff" }}>
                 {(profile?.name || user.email || "?")[0].toUpperCase()}
               </div>
-              <span style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>{profile?.name || user.email?.split("@")[0]}</span>
-              <a href="/dashboard" style={{ fontSize: 11, color: "#6b7280", textDecoration: "none", padding: "3px 10px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20 }}>Dashboard</a>
+              <span style={{ fontSize: 13, color: "#111827", fontWeight: 600 }}>{profile?.name || user.email?.split("@")[0]}</span>
+              <a href="/dashboard" style={{ fontSize: 12, color: "#16a34a", textDecoration: "none", padding: "4px 12px", border: "1px solid #bbf7d0", borderRadius: 20, fontWeight: 600 }}>Dashboard</a>
             </>
           ) : (
-            <button onClick={onSignIn} style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)", padding: "5px 14px", borderRadius: 20, cursor: "pointer", fontFamily: "inherit" }}>Sign In</button>
+            <button onClick={onSignIn} style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "#16a34a", border: "none", padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>Sign In</button>
           )}
         </div>
       </div>
 
       {/* Main */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 20px 40px", gap: 0, position: "relative", zIndex: 1 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 48px" }}>
 
         {/* Heading */}
-        <div style={{ textAlign: "center", marginBottom: 8, animation: "fadeSlideUp 0.4s ease" }}>
-          <div style={{ fontSize: "clamp(22px,4vw,34px)", fontWeight: 900, color: "#f1f5f9", letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 10 }}>
+        <div style={{ textAlign: "center", marginBottom: 32, maxWidth: 520 }}>
+          <div style={{ fontSize: "clamp(24px, 7vw, 38px)", fontWeight: 900, color: "#111827", letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 10 }}>
             {greeting}
           </div>
-          <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.65, maxWidth: 440 }}>
+          <div style={{ fontSize: 15, color: "#6b7280", lineHeight: 1.65 }}>
             {subtext}
           </div>
         </div>
 
         {/* Category grid */}
         {!selected && !custom && (
-          <div style={{ width: "100%", maxWidth: 520, marginTop: 28, animation: "fadeSlideUp 0.45s ease" }}>
+          <div style={{ width: "100%", maxWidth: 520 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {QUICK_START_CATEGORIES.map(cat => (
                 <button key={cat.label} type="button" onClick={() => pickCategory(cat)}
                   style={{
                     display: "flex", alignItems: "center", gap: 12,
-                    padding: "15px 16px", borderRadius: 14, fontFamily: "inherit",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    background: "rgba(255,255,255,0.03)",
-                    color: "#d1d5db", fontSize: 14, fontWeight: 600,
+                    padding: "15px 16px", borderRadius: 12, fontFamily: "inherit",
+                    border: "1.5px solid #e5e7eb", background: "#fff",
+                    color: "#111827", fontSize: 14, fontWeight: 600,
                     cursor: "pointer", textAlign: "left", transition: "all 0.15s",
                   }}
-                  onMouseOver={e => { e.currentTarget.style.background = "rgba(124,58,237,0.12)"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.35)"; e.currentTarget.style.color = "#c4b5fd"; }}
-                  onMouseOut={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "#d1d5db"; }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = "#16a34a"; e.currentTarget.style.background = "#f0fdf4"; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.background = "#fff"; }}
                 >
                   <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
                   <span>{cat.label}</span>
@@ -3280,11 +3274,11 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
             <button type="button" onClick={() => { setCustom(true); setSelected("custom"); setIdea(""); }}
               style={{
                 width: "100%", marginTop: 10, padding: "13px 16px", borderRadius: 12, fontFamily: "inherit",
-                border: "1px dashed rgba(255,255,255,0.1)", background: "transparent",
-                color: "#4b5563", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
+                border: "1.5px dashed #d1d5db", background: "transparent",
+                color: "#6b7280", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
               }}
-              onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(167,139,250,0.3)"; e.currentTarget.style.color = "#9ca3af"; }}
-              onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#4b5563"; }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = "#16a34a"; e.currentTarget.style.color = "#15803d"; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = "#d1d5db"; e.currentTarget.style.color = "#6b7280"; }}
             >
               ✏️ Something else — describe your own idea
             </button>
@@ -3293,8 +3287,8 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
 
         {/* Selected category + editable prompt */}
         {(selected || custom) && (
-          <div style={{ width: "100%", maxWidth: 520, marginTop: 24, display: "flex", flexDirection: "column", gap: 12, animation: "fadeSlideUp 0.3s ease" }}>
-            {/* Back pill */}
+          <div style={{ width: "100%", maxWidth: 520, display: "flex", flexDirection: "column", gap: 12 }}>
+            {/* Back */}
             <button type="button" onClick={() => { setSelected(null); setCustom(false); setIdea(""); }}
               style={{
                 alignSelf: "flex-start", background: "none", border: "none",
@@ -3310,11 +3304,11 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
               return cat ? (
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px",
-                  borderRadius: 20, background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)",
-                  fontSize: 13, fontWeight: 600, color: "#c4b5fd", alignSelf: "flex-start",
+                  borderRadius: 20, background: "#f0fdf4", border: "1px solid #bbf7d0",
+                  fontSize: 13, fontWeight: 600, color: "#15803d", alignSelf: "flex-start",
                 }}>
                   <span>{cat.emoji}</span><span>{cat.label}</span>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
               ) : null;
             })()}
@@ -3324,75 +3318,68 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
               autoFocus
               rows={4}
               style={{
-                width: "100%", padding: "14px 16px", borderRadius: 14, boxSizing: "border-box",
-                border: "1px solid rgba(124,58,237,0.3)", background: "rgba(255,255,255,0.03)",
-                color: "#e2e8f0", fontSize: 14, lineHeight: 1.65, resize: "none",
+                width: "100%", padding: "14px 16px", borderRadius: 12, boxSizing: "border-box",
+                border: "1.5px solid #16a34a", background: "#fff",
+                color: "#111827", fontSize: 14, lineHeight: 1.65, resize: "none",
                 outline: "none", fontFamily: "inherit",
-                boxShadow: "0 0 0 4px rgba(124,58,237,0.07)",
+                boxShadow: "0 0 0 3px rgba(22,163,74,0.1)",
               }}
               placeholder={custom ? "Describe your business idea, product, or target market…" : "Edit your idea or just launch it as-is…"}
               value={idea}
               onChange={e => setIdea(e.target.value)}
             />
-            <div style={{ fontSize: 11, color: "#374151" }}>
+            <div style={{ fontSize: 12, color: "#9ca3af" }}>
               {custom ? "Describe clearly for best results" : "Looks good? Just hit Launch →"}
             </div>
           </div>
         )}
 
-        {/* ── BIG LAUNCH BUTTON ── */}
+        {/* Launch button */}
         {(selected || custom || idea.trim()) && (
-          <div style={{ width: "100%", maxWidth: 520, marginTop: 16, display: "flex", flexDirection: "column", gap: 10, animation: "fadeSlideUp 0.35s ease" }}>
+          <div style={{ width: "100%", maxWidth: 520, marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
             <button
               type="button"
               onClick={user ? handleLaunch : onSignIn}
               disabled={launching || !idea.trim()}
               style={{
-                width: "100%", padding: "18px 24px", borderRadius: 16, border: "none", fontFamily: "inherit",
-                background: launching
-                  ? "rgba(5,150,105,0.2)"
-                  : !idea.trim()
-                  ? "rgba(124,58,237,0.12)"
-                  : user
-                  ? "linear-gradient(135deg, #059669 0%, #7c3aed 100%)"
-                  : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-                color: !idea.trim() ? "#4b5563" : "#fff",
-                fontSize: 17, fontWeight: 900, letterSpacing: "0.01em",
+                width: "100%", padding: "17px 24px", borderRadius: 12, border: "none", fontFamily: "inherit",
+                background: launching || !idea.trim()
+                  ? "#d1fae5"
+                  : "#16a34a",
+                color: launching || !idea.trim() ? "#6b7280" : "#fff",
+                fontSize: 16, fontWeight: 800,
                 cursor: launching || !idea.trim() ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                boxShadow: !idea.trim() || launching ? "none" : "0 8px 32px rgba(5,150,105,0.4), 0 2px 16px rgba(124,58,237,0.3)",
                 transition: "all 0.2s",
-                opacity: !idea.trim() ? 0.4 : 1,
               }}
             >
               {launching
-                ? <><div style={{ width: 16, height: 16, border: "2.5px solid rgba(255,255,255,0.25)", borderTop: "2.5px solid #fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />Launching everything…</>
+                ? <><div style={{ width: 16, height: 16, border: "2.5px solid rgba(0,0,0,0.15)", borderTop: "2.5px solid #16a34a", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />Building your business…</>
                 : !user
                 ? <>🔒 Sign In &amp; Launch My Business</>
                 : <>🚀 Launch My Business</>}
             </button>
 
-            {/* Quiet secondary */}
             {user && !launching && idea.trim() && (
               <button type="button" onClick={handlePreview}
                 style={{
-                  width: "100%", padding: "12px", borderRadius: 12, fontFamily: "inherit",
-                  border: "1px solid rgba(255,255,255,0.08)", background: "transparent",
+                  width: "100%", padding: "12px", borderRadius: 10, fontFamily: "inherit",
+                  border: "1.5px solid #e5e7eb", background: "#fff",
                   color: "#6b7280", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
                 }}
-                onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(167,139,250,0.25)"; e.currentTarget.style.color = "#a78bfa"; }}
-                onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#6b7280"; }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = "#16a34a"; e.currentTarget.style.color = "#15803d"; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.color = "#6b7280"; }}
               >
-                ⚡ Preview only (no deploy)
+                Preview only (no deploy)
               </button>
             )}
           </div>
         )}
 
         {/* Trust strip */}
-        <div style={{ display: "flex", gap: 20, marginTop: 32, flexWrap: "wrap", justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: 20, marginTop: 36, flexWrap: "wrap", justifyContent: "center" }}>
           {[["⚡","Instant results"], ["🌍","Africa-focused AI"], ["🔒","Private & secure"]].map(([icon, label]) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151" }}>
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#9ca3af" }}>
               <span style={{ fontSize: 14 }}>{icon}</span><span>{label}</span>
             </div>
           ))}
