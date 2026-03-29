@@ -77,24 +77,53 @@ The output must be ready to:
 3. Use immediately to start a business
 `;
 
+import supabase from "../supabase.js";
+// Memory structure helper
+function getDefaultMemory() {
+  return {
+    improvements: [],
+    performance: { clicks: 0, visits: 0, conversion: 0 },
+    preferences: { style: "premium", tone: "friendly" },
+    history: []
+  };
+}
+
 router.post("/", async (req, res) => {
   try {
-    const { idea, profile } = req.body;
-    // Build enhanced prompt using profile and idea
+    const { idea, profile, businessId, memory: clientMemory, user_id } = req.body;
+    // Fetch memory from DB if businessId provided
+    let memory = getDefaultMemory();
+    if (businessId) {
+      const { data, error } = await supabase.from("businesses").select("memory").eq("id", businessId).single();
+      if (!error && data && data.memory) memory = { ...memory, ...data.memory };
+    } else if (clientMemory) {
+      memory = { ...memory, ...clientMemory };
+    }
+
+    // Build enhanced prompt using memory, profile, and idea
     const enhancedPrompt = `
 User Profile:
 - Location: ${profile?.city || "Unknown"}, ${profile?.country || "Unknown"}
 - Age: ${profile?.age || "Not specified"}
 - Gender: ${profile?.gender || "Not specified"}
 
+User Preferences:
+- Style: ${memory.preferences?.style || "premium"}
+- Tone: ${memory.preferences?.tone || "friendly"}
+
+Business Memory:
+- Last improvements: ${memory.improvements?.map(i => i.change).join(", ") || "None"}
+- Last performance: ${memory.performance?.conversion ? `Conversion rate: ${memory.performance.conversion}` : "No data"}
+
 User Idea:
 ${idea}
 
 Instructions:
-- Generate business tailored to the user's location
+- Generate business tailored to the user's location and preferences
 - Use local currency and realistic pricing
 - Suggest products/services relevant to the region
 - Match tone to user's age group
+- Improve clarity and conversion if previous performance was low
 - Keep it practical and launch-ready
 `;
 
@@ -110,7 +139,32 @@ Instructions:
 
     const result = JSON.parse(response.choices[0].message.content);
 
-    res.json(result);
+    let resolvedBusinessId = businessId || null;
+
+    if (businessId) {
+      // Existing business: update memory history (single fetch — no duplicate)
+      const { data: bizData, error: bizErr } = await supabase
+        .from("businesses").select("memory").eq("id", businessId).single();
+      const mem = getDefaultMemory();
+      if (!bizErr && bizData?.memory) Object.assign(mem, bizData.memory);
+      mem.history = [{ action: "generate", idea, timestamp: Date.now() }, ...(mem.history || [])];
+      await supabase.from("businesses").update({ memory: mem }).eq("id", businessId);
+    } else if (user_id) {
+      // New business: save to Supabase so it appears in Dashboard
+      const { data: saved, error: saveErr } = await supabase
+        .from("businesses")
+        .insert([{
+          user_id,
+          name:    result.selected_name || "Untitled",
+          tagline: result.tagline       || "",
+          data:    result,
+        }])
+        .select("id")
+        .single();
+      if (!saveErr && saved) resolvedBusinessId = saved.id;
+    }
+
+    res.json({ ...result, businessId: resolvedBusinessId });
 
   } catch (error) {
     console.error(error);

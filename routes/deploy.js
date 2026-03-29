@@ -1,15 +1,28 @@
 import express from "express";
+import supabase from "../supabase.js";
+
 const router = express.Router();
 
-// Basic deploy endpoint to resolve 404 error
 router.post("/", async (req, res) => {
-	// Placeholder: implement actual deployment logic here
-	// For now, return a dummy deployment URL so the frontend can proceed
-	res.json({
-		success: true,
-		url: "https://your-business-demo-url.com",
-		message: "Deployment endpoint reached. Implement deployment logic here."
-	});
+  const { businessId } = req.body;
+
+  if (!businessId) {
+    return res.status(400).json({ error: "Missing businessId" });
+  }
+
+  const baseUrl = process.env.APP_URL || "http://localhost:5173";
+  const url = `${baseUrl}/${businessId}`;
+
+  const { error } = await supabase
+    .from("businesses")
+    .update({ deployed_url: url })
+    .eq("id", businessId);
+
+  if (error) {
+    return res.status(500).json({ error: "Failed to mark business as deployed" });
+  }
+
+  res.json({ success: true, url });
 });
 
 export default router;

@@ -1,4 +1,112 @@
+// ── Email Kit Modal ─────────────────────────────────────────────────────────
+import React, { useState } from "react";
+function EmailKitModal({ business, onClose }) {
+  const [emails, setEmails] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [editKey, setEditKey] = useState(null);
+  const [editValue, setEditValue] = useState("");
+  const [sendKey, setSendKey] = useState(null);
+  const [sendTo, setSendTo] = useState("");
+  const [sendStatus, setSendStatus] = useState(null);
+
+  const keys = [
+    { key: "welcome", label: "Welcome Email" },
+    { key: "promo", label: "Promo Email" },
+    { key: "confirmation", label: "Order/Service Confirmation" },
+    { key: "reengagement", label: "Re-engagement Email" },
+  ];
+
+  const handleGenerate = async () => {
+    setLoading(true); setError(null); setEmails(null);
+    try {
+      const res = await fetch("/api/emails/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ business })
+      });
+      const data = await res.json();
+      setEmails(data);
+    } catch {
+      setError("Failed to generate emails");
+    }
+    setLoading(false);
+  };
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleEdit = (key) => {
+    setEditKey(key);
+    setEditValue(emails[key]);
+  };
+
+  const handleEditSave = () => {
+    setEmails(e => ({ ...e, [editKey]: editValue }));
+    setEditKey(null);
+  };
+
+  const handleSend = async (key) => {
+    setSendKey(key); setSendStatus(null);
+    try {
+      const subject = keys.find(k => k.key === key).label;
+      const html = emails[key];
+      const res = await fetch("/api/emails/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: sendTo, subject, html })
+      });
+      const data = await res.json();
+      if (data.success) setSendStatus("sent");
+      else setSendStatus("fail");
+    } catch {
+      setSendStatus("fail");
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(0,0,0,0.82)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#18182b", borderRadius: 18, padding: 32, minWidth: 340, maxWidth: 420, boxShadow: "0 8px 40px #0008", color: "#f1f5f9", position: "relative" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 14, right: 14, background: "none", border: "none", color: "#a78bfa", fontSize: 18, cursor: "pointer" }}>✕</button>
+        <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 18, color: "#a78bfa" }}>📧 Email Kit</div>
+        <button onClick={handleGenerate} disabled={loading} style={{ width: "100%", padding: 12, borderRadius: 10, background: "linear-gradient(135deg,#7c3aed,#4f46e5)", color: "#fff", fontWeight: 700, fontSize: 15, border: "none", marginBottom: 18, cursor: loading ? "not-allowed" : "pointer" }}>{loading ? "Generating..." : "Generate Email Templates"}</button>
+        {error && <div style={{ color: "#f87171", marginBottom: 10 }}>{error}</div>}
+        {emails && keys.map(({ key, label }) => (
+          <div key={key} style={{ marginBottom: 18, background: "rgba(124,58,237,0.07)", border: "1px solid #a78bfa33", borderRadius: 10, padding: 14 }}>
+            <div style={{ fontWeight: 700, color: "#a78bfa", marginBottom: 6 }}>{label}</div>
+            {editKey === key ? (
+              <>
+                <textarea value={editValue} onChange={e => setEditValue(e.target.value)} style={{ width: "100%", minHeight: 80, borderRadius: 8, border: "1px solid #a78bfa", padding: 8, marginBottom: 8 }} />
+                <button onClick={handleEditSave} style={{ marginRight: 8, background: "#22c55e", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontWeight: 600, cursor: "pointer" }}>Save</button>
+                <button onClick={() => setEditKey(null)} style={{ background: "#f87171", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+              </>
+            ) : (
+              <>
+                <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "#e2e8f0", marginBottom: 8 }}>{emails[key]}</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => handleCopy(emails[key])} style={{ background: "#818cf8", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontWeight: 600, cursor: "pointer" }}>Copy</button>
+                  <button onClick={() => handleEdit(key)} style={{ background: "#a78bfa", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontWeight: 600, cursor: "pointer" }}>Edit</button>
+                  <button onClick={() => setSendKey(key)} style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontWeight: 600, cursor: "pointer" }}>Send</button>
+                </div>
+                {sendKey === key && (
+                  <div style={{ marginTop: 10 }}>
+                    <input type="email" placeholder="Recipient email" value={sendTo} onChange={e => setSendTo(e.target.value)} style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #a78bfa", marginBottom: 8 }} />
+                    <button onClick={() => handleSend(key)} style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontWeight: 600, cursor: "pointer", width: "100%" }}>Send Email</button>
+                    {sendStatus === "sent" && <div style={{ color: "#22c55e", marginTop: 6 }}>Email sent successfully 🚀</div>}
+                    {sendStatus === "fail" && <div style={{ color: "#f87171", marginTop: 6 }}>Failed to send email</div>}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 import { useState, useEffect, useRef } from "react";
+import UpgradeModal from "./UpgradeModal";
 import axios from "axios";
 import { supabase } from "./supabase";
 
@@ -143,6 +251,17 @@ const BUILD_STEPS = [
     messages: ["Final checks before launch...", "Getting ready to go live...", "Almost there..."],
     badge: "🌍 Going Live", badgeColor: "#a78bfa", badgeBg: "rgba(167,139,250,0.1)", badgeBorder: "rgba(167,139,250,0.3)",
   },
+];
+
+const QUICK_START_CATEGORIES = [
+  { emoji: "🍔", label: "Food Business",     prompt: "I want to start a food business in my area — restaurant, catering, fast food, or meal delivery" },
+  { emoji: "👗", label: "Fashion Brand",     prompt: "I want to launch a fashion brand — clothing, accessories, or streetwear for Africans" },
+  { emoji: "🌱", label: "Farming",           prompt: "I want to start a farming or agribusiness — crop farming, poultry, fish farming, or produce supply" },
+  { emoji: "🛒", label: "Online Store",      prompt: "I want to build an online store selling products to customers across Africa" },
+  { emoji: "💆", label: "Beauty & Wellness", prompt: "I want to start a beauty, salon, or wellness business serving my local community" },
+  { emoji: "📱", label: "Tech / App",        prompt: "I want to build a tech product or mobile app solving a real problem for Africans" },
+  { emoji: "🏗️", label: "Construction",     prompt: "I want to start a construction, real estate, or building materials business" },
+  { emoji: "🎓", label: "Education",         prompt: "I want to launch an education, tutoring, or skills training business" },
 ];
 
 const LAUNCH_STEPS = [
@@ -1682,7 +1801,7 @@ function PromptEditor({ styleConfig, onUpdate, locked, onSignIn }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post("http://localhost:3000/api/style", { prompt, current: styleConfig });
+      const res = await axios.post("/api/style", { prompt, current: styleConfig });
       if (res.data && typeof res.data === "object" && res.data.primary_color) {
         onUpdate(prev => ({ ...prev, ...res.data }));
         setSuccess(true);
@@ -1869,7 +1988,7 @@ function WebsitePreview({ data, onGenerateAnother, user, styleConfig, onSignIn }
     setDeployError(null);
     setLinkCopied(false);
     try {
-      const res = await axios.post("/api/deploy", { data });
+      const res = await axios.post("/api/deploy", { businessId: data.businessId });
       setDeployedUrl(res.data.url);
     } catch (err) {
       console.error("Deploy error:", err.response?.data || err.message);
@@ -3024,6 +3143,237 @@ function AuthModal({ onClose, onSuccess }) {
   );
 }
 
+// ── Full-screen onboarding ────────────────────────────────────────────────────
+function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
+  const [selected, setSelected]   = useState(null);   // category label
+  const [idea, setIdea]           = useState("");
+  const [custom, setCustom]       = useState(false);
+  const [launching, setLaunching] = useState(false);
+
+  const pickCategory = (cat) => {
+    setSelected(cat.label);
+    setIdea(cat.prompt);
+    setCustom(false);
+  };
+
+  const handleLaunch = () => {
+    if (!idea.trim()) return;
+    setLaunching(true);
+    onLaunch(idea);
+  };
+
+  const handlePreview = () => {
+    if (!idea.trim()) return;
+    onPreview(idea);
+  };
+
+  const greeting = profile?.name
+    ? `Welcome back, ${profile.name} 👋`
+    : "What business do you want to build?";
+
+  const subtext = selected
+    ? `Great choice. Tap Launch — we'll build everything in seconds.`
+    : profile?.city
+    ? `Tap a category below — we'll tailor it for ${profile.city}.`
+    : "One tap. AI builds your brand, website & marketing instantly.";
+
+  return (
+    <div style={{
+      minHeight: "100vh", backgroundColor: "#06060e", color: "#e2e8f0",
+      fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+      display: "flex", flexDirection: "column", position: "relative", overflow: "hidden",
+    }}>
+      {/* Ambient orbs */}
+      <div style={{ position: "absolute", top: -120, left: -80, width: 500, height: 500, borderRadius: "50%", filter: "blur(90px)", background: "radial-gradient(circle, rgba(109,40,217,0.22) 0%, transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -100, right: -60, width: 420, height: 420, borderRadius: "50%", filter: "blur(80px)", background: "radial-gradient(circle, rgba(79,70,229,0.16) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+      {/* Top bar */}
+      <div style={{
+        height: 56, padding: "0 28px", display: "flex", alignItems: "center",
+        justifyContent: "space-between", position: "relative", zIndex: 10,
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        backgroundColor: "rgba(6,6,14,0.8)", backdropFilter: "blur(20px)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff", boxShadow: "0 2px 12px rgba(124,58,237,0.5)" }}>B</div>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "#f1f5f9", letterSpacing: "0.02em" }}>BGA</span>
+          <span style={{ fontSize: 12, color: "#374151", marginLeft: 4 }}>Business Generator Africa</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {user ? (
+            <>
+              <div style={{ width: 26, height: 26, borderRadius: "50%", background: "linear-gradient(135deg,#7c3aed,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>
+                {(profile?.name || user.email || "?")[0].toUpperCase()}
+              </div>
+              <span style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>{profile?.name || user.email?.split("@")[0]}</span>
+              <a href="/dashboard" style={{ fontSize: 11, color: "#6b7280", textDecoration: "none", padding: "3px 10px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20 }}>Dashboard</a>
+            </>
+          ) : (
+            <button onClick={onSignIn} style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)", padding: "5px 14px", borderRadius: 20, cursor: "pointer", fontFamily: "inherit" }}>Sign In</button>
+          )}
+        </div>
+      </div>
+
+      {/* Main */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 20px 40px", gap: 0, position: "relative", zIndex: 1 }}>
+
+        {/* Heading */}
+        <div style={{ textAlign: "center", marginBottom: 8, animation: "fadeSlideUp 0.4s ease" }}>
+          <div style={{ fontSize: "clamp(22px,4vw,34px)", fontWeight: 900, color: "#f1f5f9", letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 10 }}>
+            {greeting}
+          </div>
+          <div style={{ fontSize: 14, color: "#6b7280", lineHeight: 1.65, maxWidth: 440 }}>
+            {subtext}
+          </div>
+        </div>
+
+        {/* Category grid */}
+        {!selected && !custom && (
+          <div style={{ width: "100%", maxWidth: 520, marginTop: 28, animation: "fadeSlideUp 0.45s ease" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+              {QUICK_START_CATEGORIES.map(cat => (
+                <button key={cat.label} type="button" onClick={() => pickCategory(cat)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "15px 16px", borderRadius: 14, fontFamily: "inherit",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    background: "rgba(255,255,255,0.03)",
+                    color: "#d1d5db", fontSize: 14, fontWeight: 600,
+                    cursor: "pointer", textAlign: "left", transition: "all 0.15s",
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.background = "rgba(124,58,237,0.12)"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.35)"; e.currentTarget.style.color = "#c4b5fd"; }}
+                  onMouseOut={e => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "#d1d5db"; }}
+                >
+                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => { setCustom(true); setSelected("custom"); setIdea(""); }}
+              style={{
+                width: "100%", marginTop: 10, padding: "13px 16px", borderRadius: 12, fontFamily: "inherit",
+                border: "1px dashed rgba(255,255,255,0.1)", background: "transparent",
+                color: "#4b5563", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
+              }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(167,139,250,0.3)"; e.currentTarget.style.color = "#9ca3af"; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#4b5563"; }}
+            >
+              ✏️ Something else — describe your own idea
+            </button>
+          </div>
+        )}
+
+        {/* Selected category + editable prompt */}
+        {(selected || custom) && (
+          <div style={{ width: "100%", maxWidth: 520, marginTop: 24, display: "flex", flexDirection: "column", gap: 12, animation: "fadeSlideUp 0.3s ease" }}>
+            {/* Back pill */}
+            <button type="button" onClick={() => { setSelected(null); setCustom(false); setIdea(""); }}
+              style={{
+                alignSelf: "flex-start", background: "none", border: "none",
+                color: "#6b7280", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
+                display: "flex", alignItems: "center", gap: 5, padding: 0,
+              }}>
+              ← Back
+            </button>
+
+            {/* Selected badge */}
+            {selected && selected !== "custom" && (() => {
+              const cat = QUICK_START_CATEGORIES.find(c => c.label === selected);
+              return cat ? (
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px",
+                  borderRadius: 20, background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)",
+                  fontSize: 13, fontWeight: 600, color: "#c4b5fd", alignSelf: "flex-start",
+                }}>
+                  <span>{cat.emoji}</span><span>{cat.label}</span>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Editable textarea */}
+            <textarea
+              autoFocus
+              rows={4}
+              style={{
+                width: "100%", padding: "14px 16px", borderRadius: 14, boxSizing: "border-box",
+                border: "1px solid rgba(124,58,237,0.3)", background: "rgba(255,255,255,0.03)",
+                color: "#e2e8f0", fontSize: 14, lineHeight: 1.65, resize: "none",
+                outline: "none", fontFamily: "inherit",
+                boxShadow: "0 0 0 4px rgba(124,58,237,0.07)",
+              }}
+              placeholder={custom ? "Describe your business idea, product, or target market…" : "Edit your idea or just launch it as-is…"}
+              value={idea}
+              onChange={e => setIdea(e.target.value)}
+            />
+            <div style={{ fontSize: 11, color: "#374151" }}>
+              {custom ? "Describe clearly for best results" : "Looks good? Just hit Launch →"}
+            </div>
+          </div>
+        )}
+
+        {/* ── BIG LAUNCH BUTTON ── */}
+        {(selected || custom || idea.trim()) && (
+          <div style={{ width: "100%", maxWidth: 520, marginTop: 16, display: "flex", flexDirection: "column", gap: 10, animation: "fadeSlideUp 0.35s ease" }}>
+            <button
+              type="button"
+              onClick={user ? handleLaunch : onSignIn}
+              disabled={launching || !idea.trim()}
+              style={{
+                width: "100%", padding: "18px 24px", borderRadius: 16, border: "none", fontFamily: "inherit",
+                background: launching
+                  ? "rgba(5,150,105,0.2)"
+                  : !idea.trim()
+                  ? "rgba(124,58,237,0.12)"
+                  : user
+                  ? "linear-gradient(135deg, #059669 0%, #7c3aed 100%)"
+                  : "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                color: !idea.trim() ? "#4b5563" : "#fff",
+                fontSize: 17, fontWeight: 900, letterSpacing: "0.01em",
+                cursor: launching || !idea.trim() ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                boxShadow: !idea.trim() || launching ? "none" : "0 8px 32px rgba(5,150,105,0.4), 0 2px 16px rgba(124,58,237,0.3)",
+                transition: "all 0.2s",
+                opacity: !idea.trim() ? 0.4 : 1,
+              }}
+            >
+              {launching
+                ? <><div style={{ width: 16, height: 16, border: "2.5px solid rgba(255,255,255,0.25)", borderTop: "2.5px solid #fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />Launching everything…</>
+                : !user
+                ? <>🔒 Sign In &amp; Launch My Business</>
+                : <>🚀 Launch My Business</>}
+            </button>
+
+            {/* Quiet secondary */}
+            {user && !launching && idea.trim() && (
+              <button type="button" onClick={handlePreview}
+                style={{
+                  width: "100%", padding: "12px", borderRadius: 12, fontFamily: "inherit",
+                  border: "1px solid rgba(255,255,255,0.08)", background: "transparent",
+                  color: "#6b7280", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
+                }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(167,139,250,0.25)"; e.currentTarget.style.color = "#a78bfa"; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#6b7280"; }}
+              >
+                ⚡ Preview only (no deploy)
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Trust strip */}
+        <div style={{ display: "flex", gap: 20, marginTop: 32, flexWrap: "wrap", justifyContent: "center" }}>
+          {[["⚡","Instant results"], ["🌍","Africa-focused AI"], ["🔒","Private & secure"]].map(([icon, label]) => (
+            <div key={label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151" }}>
+              <span style={{ fontSize: 14 }}>{icon}</span><span>{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
 
   // Auth + UI state
@@ -3031,27 +3381,34 @@ export default function App() {
   const [profile, setProfile] = useState(null);
   const [authModal, setAuthModal] = useState(false);
 
-  // Business state
   const [idea, setIdea] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [deploying, setDeploying] = useState(false);
+
+  // History + deploy state
+  const [history, setHistory]       = useState([]);
+  const [activeId, setActiveId]     = useState(null);
+  const [deploying, setDeploying]   = useState(false);
   const [deployedUrl, setDeployedUrl] = useState(null);
   const [deployError, setDeployError] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [activeId, setActiveId] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
 
-  // Loading + style + launch state
-  const [loadStep, setLoadStep] = useState(0);
+  // Loading steps + style
+  const [loadStep, setLoadStep]         = useState(0);
   const [showSkeleton, setShowSkeleton] = useState(false);
-  const stepTimerRef = useRef(null);
-  const [styleConfig, setStyleConfig] = useState(DEFAULT_STYLE_CONFIG);
+  const stepTimerRef                    = useRef(null);
+  const [styleConfig, setStyleConfig]   = useState({});
+
+  // Launch experience state
   const [launchLoading, setLaunchLoading] = useState(false);
-  const [launchStep, setLaunchStep] = useState(0);
+  const [launchStep, setLaunchStep]       = useState(0);
   const [launchProgress, setLaunchProgress] = useState(0);
-  const [launchResult, setLaunchResult] = useState(null);
-  const [launchError, setLaunchError] = useState(null);
+  const [launchResult, setLaunchResult]   = useState(null);
+  const [launchError, setLaunchError]     = useState(null);
+
+  // Upgrade modal
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // ── Profile helpers ───────────────────────────────────────────────────────
   const fetchProfile = async (userId) => {
@@ -3062,6 +3419,25 @@ export default function App() {
     } catch { /* table may not exist yet — fail silently */ }
   };
 
+  // Update business memory helper
+  const updateBusinessMemory = async (businessId, update) => {
+    if (!businessId) return;
+    const { data, error } = await supabase.from("businesses").select("memory").eq("id", businessId).single();
+    let mem = {
+      improvements: [],
+      performance: { clicks: 0, visits: 0, conversion: 0 },
+      preferences: { style: "premium", tone: "friendly" },
+      history: []
+    };
+    if (!error && data && data.memory) mem = { ...mem, ...data.memory };
+    // Merge update
+    if (update.improvements) mem.improvements = [...(mem.improvements || []), ...update.improvements];
+    if (update.performance) mem.performance = { ...mem.performance, ...update.performance };
+    if (update.preferences) mem.preferences = { ...mem.preferences, ...update.preferences };
+    if (update.history) mem.history = [...(update.history || []), ...(mem.history || [])];
+    await supabase.from("businesses").update({ memory: mem }).eq("id", businessId);
+  };
+
   const fetchBusinesses = async (userId) => {
     try {
       const { data, error } = await supabase
@@ -3069,6 +3445,15 @@ export default function App() {
         .order("created_at", { ascending: false });
       if (!error && data) setHistory(data);
     } catch { /* silently ignore */ }
+  };
+
+  // Premium feature gating helper
+  const requirePro = () => {
+    if (profile && profile.plan !== "pro") {
+      setShowUpgradeModal(true);
+      return false;
+    }
+    return true;
   };
 
   // Auth: restore session on mount, listen for changes
@@ -3098,13 +3483,13 @@ export default function App() {
     }
   }, []);
 
-  // Save to localStorage after new result
+  // Save to localStorage after new result and update memory
   useEffect(() => {
-    if (result && result.selected_name && result.tagline) {
+    if (result && result.selected_name) {
       const newItem = {
-        id: Date.now(),
+        id: result.businessId || Date.now(),
         name: result.selected_name,
-        tagline: result.tagline,
+        tagline: result.tagline || "",
         data: result,
       };
       setHistory(prev => {
@@ -3113,12 +3498,22 @@ export default function App() {
         return updated;
       });
       setActiveId(newItem.id);
+      // Add to memory history
+      updateBusinessMemory(result.businessId, {
+        history: [{ action: "generate", result, timestamp: Date.now() }]
+      });
     }
     // eslint-disable-next-line
   }, [result]);
   const handleHistoryClick = (item) => {
     setResult(item.data);
     setActiveId(item.id);
+    // Optionally track click in memory
+    if (item.data && item.data.businessId) {
+      updateBusinessMemory(item.data.businessId, {
+        performance: { clicks: 1 }
+      });
+    }
   };
 
   const handleDelete = (id) => {
@@ -3129,6 +3524,8 @@ export default function App() {
       return updated;
     });
     if (activeId === id) setResult(null);
+    // Optionally track delete in memory
+    // updateBusinessMemory(id, { history: [{ action: "delete", timestamp: Date.now() }] });
   };
 
   const handleClearAll = () => {
@@ -3164,16 +3561,15 @@ export default function App() {
     setLoading(true);
     setResult(null);
     try {
-      // Enrich idea with user's location context when available
       const locationParts = [profile?.city, profile?.state, profile?.country].filter(Boolean);
       const enrichedIdea = locationParts.length
         ? `${idea.trim()} [Target market: ${locationParts.join(", ")}]`
         : idea.trim();
-      const res = await axios.post("http://localhost:3000/api/generate", { idea: enrichedIdea });
+      const res = await axios.post("/api/generate", { idea: enrichedIdea, user_id: user?.id, businessId: result?.businessId });
       setResult(res.data);
     } catch (err) {
       console.error("ERROR:", err);
-      alert("Generation failed. Check the console for details.");
+      alert("Generation failed. Please try again.");
     }
     setLoading(false);
   };
@@ -3182,66 +3578,66 @@ export default function App() {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generateBusiness();
   };
 
-  const handleOneLaunch = async () => {
-    if (!idea.trim()) return;
+  // ── Idea-parameterised launch (avoids setState race from onboarding) ─────────
+  const handleOneLaunchWithIdea = async (chosenIdea) => {
+    if (!chosenIdea?.trim()) return;
+    setIdea(chosenIdea);
     setLaunchLoading(true);
     setLaunchStep(1);
     setLaunchProgress(2);
     setLaunchResult(null);
     setLaunchError(null);
     sound.init(); haptic.start();
-
     try {
-      // Step 1: Generate business
-      const genRes = await axios.post("http://localhost:3000/api/generate", { idea });
+      const locationParts = [profile?.city, profile?.state, profile?.country].filter(Boolean);
+      const enriched = locationParts.length ? `${chosenIdea.trim()} [Target market: ${locationParts.join(', ')}]` : chosenIdea.trim();
+      const genRes = await axios.post('/api/generate', { idea: enriched, user_id: user?.id });
       const data = genRes.data;
       setResult(data);
       setLaunchProgress(18);
-
-      // Step 2: Website render (UX delay for perceived quality)
       setLaunchStep(2); sound.tick(); haptic.step();
-      setLaunchProgress(26);
       await new Promise(r => setTimeout(r, 1400));
       setLaunchProgress(36);
-
-      // Step 3: Flyer (wait for fonts)
       setLaunchStep(3); sound.tick(); haptic.step();
-      setLaunchProgress(46);
       await document.fonts.ready;
       await new Promise(r => setTimeout(r, 1100));
       setLaunchProgress(54);
-
-      // Step 4: Logo
       setLaunchStep(4); sound.tick(); haptic.step();
-      setLaunchProgress(62);
       await new Promise(r => setTimeout(r, 1100));
       setLaunchProgress(70);
-
-      // Step 5: Social kit
       setLaunchStep(5); sound.tick(); haptic.step();
-      setLaunchProgress(78);
       await new Promise(r => setTimeout(r, 900));
       setLaunchProgress(84);
-
-      // Step 6: Deploy
       setLaunchStep(6); sound.tick(); haptic.step();
-      setLaunchProgress(88);
-      const deployRes = await axios.post("/api/deploy", { data });
+      const deployRes = await axios.post('/api/deploy', { businessId: data.businessId });
       const deployedUrl = deployRes.data.url;
       setLaunchProgress(100);
       sound.success(); haptic.success();
       _incDailyCount();
-
       await new Promise(r => setTimeout(r, 700));
       setLaunchResult({ data, deployedUrl });
-
     } catch (err) {
-      const msg = err.response?.data?.error || err.message || "Something went wrong. Please try again.";
-      setLaunchError(msg);
+      setLaunchError(err.response?.data?.error || err.message || 'Something went wrong.');
     }
     setLaunchLoading(false);
   };
 
+  const generateBusinessWithIdea = async (chosenIdea) => {
+    if (!chosenIdea?.trim()) return;
+    setIdea(chosenIdea);
+    setLoading(true);
+    setResult(null);
+    try {
+      const locationParts = [profile?.city, profile?.state, profile?.country].filter(Boolean);
+      const enriched = locationParts.length ? `${chosenIdea.trim()} [Target market: ${locationParts.join(', ')}]` : chosenIdea.trim();
+      const res = await axios.post('/api/generate', { idea: enriched, user_id: user?.id });
+      setResult(res.data);
+    } catch (err) {
+      console.error(err);
+      alert('Generation failed. Please try again.');
+    }
+    setLoading(false);
+  };
 
 
   // Auth handlers
@@ -3256,6 +3652,66 @@ export default function App() {
     setResult(null);
   };
 
+  // ── Full-screen onboarding OR split-panel app ─────────────────────────────
+  // Show onboarding when there is no result yet (before first generation)
+  if (!result && !loading && !launchLoading) {
+    return (
+      <>
+        <style>{keyframes}</style>
+        {authModal && (
+          <AuthModal
+            onClose={() => setAuthModal(false)}
+            onSuccess={async (u) => {
+              setUser(u);
+              setAuthModal(false);
+              if (u) await fetchProfile(u.id);
+            }}
+          />
+        )}
+        {showUpgradeModal && (
+          <UpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} onUpgraded={() => fetchProfile(user.id)} />
+        )}
+        <OnboardingScreen
+          profile={profile}
+          user={user}
+          onLaunch={(chosenIdea) => {
+            setIdea(chosenIdea);
+            // Kick off the full launch sequence
+            setTimeout(() => {
+              handleOneLaunchWithIdea(chosenIdea);
+            }, 0);
+          }}
+          onPreview={(chosenIdea) => {
+            setIdea(chosenIdea);
+            setTimeout(() => {
+              generateBusinessWithIdea(chosenIdea);
+            }, 0);
+          }}
+          onSignIn={handleSignIn}
+        />
+        {/* Launch experience overlay on top of onboarding */}
+        {(launchLoading || launchError) && !launchResult && (
+          <LaunchExperience
+            step={launchStep}
+            progress={launchProgress}
+            error={launchError}
+            onRetry={() => idea && handleOneLaunchWithIdea(idea)}
+            onDismiss={() => { setLaunchError(null); setLaunchLoading(false); }}
+          />
+        )}
+        {launchResult && (
+          <LaunchSuccessScreen
+            data={launchResult.data}
+            deployedUrl={launchResult.deployedUrl}
+            onClose={() => setLaunchResult(null)}
+            onLaunchAnother={() => { setLaunchResult(null); setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
+          />
+        )}
+      </>
+    );
+  }
+
+  // ── Main split-panel app (shown after generation) ─────────────────────────
   return (
     <>
       <style>{keyframes}</style>
@@ -3268,6 +3724,9 @@ export default function App() {
             if (u) await fetchProfile(u.id);
           }}
         />
+      )}
+      {showUpgradeModal && (
+        <UpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} onUpgraded={() => fetchProfile(user.id)} />
       )}
       <div style={{
         minHeight: "100vh",
@@ -3296,14 +3755,9 @@ export default function App() {
           position: "relative",
           zIndex: 10,
         }}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <div style={{
-              width: "28px", height: "28px",
-              borderRadius: "8px",
+              width: "28px", height: "28px", borderRadius: "8px",
               background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "13px", fontWeight: "800", color: "#fff",
@@ -3321,7 +3775,6 @@ export default function App() {
             </div>
             {user ? (
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                {/* Avatar + name */}
                 <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
                   <div style={{
                     width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
@@ -3336,41 +3789,29 @@ export default function App() {
                     {profile?.name ? `Hey, ${profile.name}` : user.email?.split("@")[0]}
                   </span>
                 </div>
-                <a href="/dashboard"
-                  style={{
-                    fontSize: "11px", fontWeight: "600", color: "#a78bfa",
-                    background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)",
-                    padding: "3px 12px", borderRadius: "20px", cursor: "pointer",
-                    textDecoration: "none",
-                  }}
-                >Dashboard</a>
-                <button
-                  onClick={handleSignOut}
-                  style={{
-                    fontSize: "11px", fontWeight: "500", color: "#6b7280",
-                    background: "none", border: "1px solid rgba(255,255,255,0.08)",
-                    padding: "3px 10px", borderRadius: "20px", cursor: "pointer",
-                    transition: "color 0.15s, border-color 0.15s",
-                  }}
-                  onMouseOver={e => { e.currentTarget.style.color = "#9ca3af"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
-                  onMouseOut={e => { e.currentTarget.style.color = "#6b7280"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+                <a href="/dashboard" style={{
+                  fontSize: "11px", fontWeight: "600", color: "#a78bfa",
+                  background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)",
+                  padding: "3px 12px", borderRadius: "20px", textDecoration: "none",
+                }}>Dashboard</a>
+                <button onClick={handleSignOut} style={{
+                  fontSize: "11px", fontWeight: "500", color: "#6b7280",
+                  background: "none", border: "1px solid rgba(255,255,255,0.08)",
+                  padding: "3px 10px", borderRadius: "20px", cursor: "pointer",
+                }}
+                  onMouseOver={e => { e.currentTarget.style.color = "#9ca3af"; }}
+                  onMouseOut={e => { e.currentTarget.style.color = "#6b7280"; }}
                 >Sign Out</button>
               </div>
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <div style={{
-                  fontSize: "11px", fontWeight: "600", color: "#6b7280",
-                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                  padding: "3px 10px", borderRadius: "20px", letterSpacing: "0.04em",
-                }}>Guest Mode</div>
-                <button
-                  onClick={handleSignIn}
-                  style={{
-                    fontSize: "11px", fontWeight: "600", color: "#a78bfa",
-                    background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)",
-                    padding: "3px 12px", borderRadius: "20px", cursor: "pointer",
-                    transition: "background 0.15s",
-                  }}
+                <div style={{ fontSize: "11px", fontWeight: "600", color: "#6b7280", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", padding: "3px 10px", borderRadius: "20px" }}>Guest Mode</div>
+                <button onClick={handleSignIn} style={{
+                  fontSize: "11px", fontWeight: "600", color: "#a78bfa",
+                  background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.25)",
+                  padding: "3px 12px", borderRadius: "20px", cursor: "pointer",
+                  transition: "background 0.15s",
+                }}
                   onMouseOver={e => e.currentTarget.style.background = "rgba(124,58,237,0.2)"}
                   onMouseOut={e => e.currentTarget.style.background = "rgba(124,58,237,0.1)"}
                 >Sign In</button>
@@ -3379,180 +3820,49 @@ export default function App() {
           </div>
         </div>
 
-        {/* Body */}
+        {/* Body — split panel */}
         <div style={{
-          flex: 1,
-          display: "grid",
-          gridTemplateColumns: "420px 1fr",
-          overflow: "hidden",
-          height: "calc(100vh - 60px)",
-          position: "relative",
-          zIndex: 1,
+          flex: 1, display: "grid", gridTemplateColumns: "380px 1fr",
+          overflow: "hidden", height: "calc(100vh - 60px)", position: "relative", zIndex: 1,
         }}>
           {/* LEFT PANEL */}
           <div style={{
             borderRight: "1px solid rgba(255,255,255,0.06)",
-            display: "flex",
-            flexDirection: "column",
-            padding: "32px 28px",
-            gap: "22px",
-            overflowY: "auto",
-            backdropFilter: "blur(20px)",
-            backgroundColor: "rgba(10,10,20,0.5)",
+            display: "flex", flexDirection: "column",
+            padding: "28px 24px", gap: "18px", overflowY: "auto",
+            backdropFilter: "blur(20px)", backgroundColor: "rgba(10,10,20,0.5)",
           }}>
-            {/* Heading */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <div style={{ fontSize: "11px", fontWeight: "600", color: "#6b7280", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                New Business
+            {/* Greeting */}
+            <div>
+              <div style={{ fontSize: "18px", fontWeight: "800", color: "#f1f5f9", lineHeight: "1.3", letterSpacing: "-0.01em", marginBottom: 4 }}>
+                {profile?.name
+                  ? <>{profile.name}'s business <span style={{ background: "linear-gradient(135deg,#a78bfa,#818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>is live</span> 🎉</>
+                  : <>Your business <span style={{ background: "linear-gradient(135deg,#a78bfa,#818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>is ready</span></>
+                }
               </div>
-              <div style={{ fontSize: "23px", fontWeight: "800", color: "#f1f5f9", lineHeight: "1.25", letterSpacing: "-0.01em" }}>
-                Generate your{" "}
-                <span style={{
-                  background: "linear-gradient(135deg, #a78bfa, #818cf8)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}>next venture</span>
+              <div style={{ fontSize: "12px", color: "#4b5563" }}>
+                👉 Next step: Share your business to get your first customers
               </div>
-              <div style={{ fontSize: "13px", color: "#6b7280", lineHeight: "1.65" }}>
-                Describe your idea — AI will build a complete business concept, brand, and product lineup in seconds.
-              </div>
-            </div>
-
-            {/* Trust signals */}
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              {TRUST_SIGNALS.map((t) => (
-                <div key={t.label} style={{
-                  display: "flex", alignItems: "center", gap: "5px",
-                  fontSize: "11px", color: "#9ca3af",
-                  backgroundColor: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  padding: "4px 10px", borderRadius: "20px",
-                }}>
-                  <span>{t.icon}</span>
-                  <span>{t.label}</span>
-                </div>
-              ))}
             </div>
 
             <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent)" }} />
 
-            {/* Textarea */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <textarea
-                style={{
-                  width: "100%",
-                  height: "168px",
-                  backgroundColor: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.09)",
-                  borderRadius: "14px",
-                  color: "#e2e8f0",
-                  fontSize: "14px",
-                  lineHeight: "1.65",
-                  padding: "14px 16px",
-                  resize: "none",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  width: "100%",
-                  backdropFilter: "blur(8px)",
-                }}
-                placeholder="Describe your business idea, target market, or product..."
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={loading}
-              />
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: "11px", color: "#4b5563" }}>⌘ + Enter to generate</span>
-                <span style={{ fontSize: "11px", color: idea.length > 20 ? "#a78bfa" : "#4b5563" }}>{idea.length} chars</span>
-              </div>
-            </div>
-
-            {/* Generate button */}
-            <button
-              className="gen-btn"
+            {/* Launch another */}
+            <button type="button"
+              onClick={() => { setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
               style={{
-                width: "100%",
-                padding: "14px 20px",
-                background: loading
-                  ? "rgba(91,33,182,0.4)"
-                  : "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                color: "#fff",
-                border: "1px solid rgba(139,92,246,0.3)",
-                borderRadius: "12px",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: loading || !idea.trim() ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                letterSpacing: "0.02em",
-                boxShadow: loading ? "none" : "0 4px 20px rgba(124,58,237,0.3)",
-                opacity: !idea.trim() && !loading ? 0.5 : 1,
-              }}
-              onClick={generateBusiness}
-              disabled={loading || !idea.trim()}
-            >
-              {loading ? (
-                <>
-                  <div style={{ width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.25)", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                  </svg>
-                  Generate Business
-                </>
-              )}
-            </button>
-
-
-            {/* One-click Launch button */}
-            <button
-              className="gen-btn"
-              onClick={user ? handleOneLaunch : handleSignIn}
-              disabled={launchLoading || !idea.trim()}
-              style={{
-                width: "100%",
-                padding: "15px 20px",
-                background: launchLoading
-                  ? "rgba(16,185,129,0.25)"
-                  : !idea.trim()
-                  ? "rgba(16,185,129,0.1)"
-                  : user
-                  ? "linear-gradient(135deg, #059669 0%, #7c3aed 100%)"
-                  : "linear-gradient(135deg, #374151 0%, #4b5563 100%)",
-                color: !idea.trim() && !launchLoading ? "#6b7280" : "#fff",
-                border: user ? "1px solid rgba(16,185,129,0.35)" : "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
-                fontSize: "14px",
-                fontWeight: "700",
-                cursor: launchLoading || !idea.trim() ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                letterSpacing: "0.02em",
-                boxShadow: launchLoading || !idea.trim() || !user ? "none" : "0 4px 24px rgba(16,185,129,0.3), 0 2px 12px rgba(124,58,237,0.2)",
-                opacity: !idea.trim() && !launchLoading ? 0.5 : 1,
-                transition: "all 0.2s",
+                width: "100%", padding: "13px 16px", borderRadius: 12, fontFamily: "inherit",
+                background: "linear-gradient(135deg, #059669 0%, #7c3aed 100%)",
+                color: "#fff", border: "none",
+                fontSize: "14px", fontWeight: "700", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                boxShadow: "0 4px 20px rgba(5,150,105,0.3)",
               }}
             >
-              {launchLoading ? (
-                <>
-                  <div style={{ width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.25)", borderTop: "2px solid #fff", borderRadius: "50%", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
-                  Launching...
-                </>
-              ) : !user ? (
-                <>🔒 Sign In to Launch</>
-              ) : (
-                <>🚀 Launch My Business</>
-              )}
+              🚀 Launch Another Business
             </button>
 
-            {/* Prompt-to-Edit */}
+            {/* Style editor */}
             {result && (
               <PromptEditor
                 styleConfig={styleConfig}
@@ -3562,142 +3872,56 @@ export default function App() {
               />
             )}
 
-            {/* HISTORY PANEL */}
+            {/* History */}
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {/* Header row */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: "600", color: "#6b7280", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    Saved Businesses
-                  </span>
+                  <span style={{ fontSize: "11px", fontWeight: "600", color: "#6b7280", letterSpacing: "0.1em", textTransform: "uppercase" }}>Saved Businesses</span>
                   {history.length > 0 && (
-                    <span style={{
-                      fontSize: "10px", fontWeight: "700",
-                      color: "#a78bfa",
-                      backgroundColor: "rgba(139,92,246,0.12)",
-                      border: "1px solid rgba(139,92,246,0.2)",
-                      padding: "1px 7px", borderRadius: "20px",
-                    }}>{history.length}</span>
+                    <span style={{ fontSize: "10px", fontWeight: "700", color: "#a78bfa", backgroundColor: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.2)", padding: "1px 7px", borderRadius: "20px" }}>{history.length}</span>
                   )}
                 </div>
                 {history.length > 0 && (
-                  <button
-                    onClick={handleClearAll}
-                    style={{
-                      fontSize: "11px", fontWeight: "500",
-                      color: "#4b5563",
-                      background: "none", border: "none",
-                      cursor: "pointer",
-                      padding: "2px 0",
-                      letterSpacing: "0.01em",
-                      transition: "color 0.15s",
-                    }}
+                  <button onClick={handleClearAll} style={{ fontSize: "11px", fontWeight: "500", color: "#4b5563", background: "none", border: "none", cursor: "pointer", padding: "2px 0" }}
                     onMouseOver={e => (e.currentTarget.style.color = "#f87171")}
                     onMouseOut={e => (e.currentTarget.style.color = "#4b5563")}
-                  >
-                    Clear all
-                  </button>
+                  >Clear all</button>
                 )}
               </div>
-
-              {/* List */}
-              <div style={{
-                borderRadius: "14px",
-                border: "1px solid rgba(255,255,255,0.07)",
-                overflow: "hidden",
-                backgroundColor: "rgba(255,255,255,0.015)",
-              }}>
+              <div style={{ border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", overflow: "hidden", backgroundColor: "rgba(255,255,255,0.01)" }}>
                 {history.length === 0 ? (
-                  <div style={{
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
-                    padding: "28px 16px",
-                    color: "#374151", fontSize: "12px", textAlign: "center", lineHeight: "1.6",
-                  }}>
+                  <div style={{ padding: "20px 16px", textAlign: "center", fontSize: "12px", color: "#374151", lineHeight: "1.6", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "20px", opacity: 0.4 }}>🗂️</span>
-                    <span>No saved businesses yet.<br />Generated ideas will appear here.</span>
+                    <span>No saved businesses yet.</span>
                   </div>
                 ) : (
-                  <div style={{
-                    overflowY: "auto",
-                    maxHeight: "280px",
-                  }}>
+                  <div style={{ overflowY: "auto", maxHeight: "280px" }}>
                     {history.map((item, index) => {
                       const isActive = activeId === item.id;
                       return (
-                        <div
-                          key={item.id}
-                          onClick={() => handleHistoryClick(item)}
+                        <div key={item.id} onClick={() => handleHistoryClick(item)}
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            padding: "10px 14px",
-                            cursor: "pointer",
+                            display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", cursor: "pointer",
                             borderBottom: index < history.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                             borderLeft: isActive ? "2px solid #7c3aed" : "2px solid transparent",
                             backgroundColor: isActive ? "rgba(124,58,237,0.1)" : "transparent",
-                            boxShadow: isActive ? "inset 0 0 20px rgba(124,58,237,0.06)" : "none",
-                            transition: "background-color 0.2s, border-color 0.2s, box-shadow 0.2s",
-                            userSelect: "none",
+                            transition: "background-color 0.2s",
                           }}
                           onMouseOver={e => { if (!isActive) e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.03)"; }}
                           onMouseOut={e => { if (!isActive) e.currentTarget.style.backgroundColor = "transparent"; }}
                         >
-                          {/* Active indicator dot */}
-                          <div style={{
-                            width: "6px", height: "6px", borderRadius: "50%", flexShrink: 0,
-                            backgroundColor: isActive ? "#a78bfa" : "rgba(255,255,255,0.1)",
-                            boxShadow: isActive ? "0 0 6px rgba(167,139,250,0.7)" : "none",
-                            transition: "background-color 0.2s, box-shadow 0.2s",
-                          }} />
-
-                          {/* Text */}
-                          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
-                            <span style={{
-                              fontSize: "13px", fontWeight: "600",
-                              color: isActive ? "#c4b5fd" : "#e2e8f0",
-                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                              transition: "color 0.2s",
-                            }}>{item.name}</span>
-                            <span style={{
-                              fontSize: "11px", color: "#4b5563",
-                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                            }}>{item.tagline}</span>
+                          <div style={{ width: "6px", height: "6px", borderRadius: "50%", flexShrink: 0, backgroundColor: isActive ? "#a78bfa" : "rgba(255,255,255,0.1)", boxShadow: isActive ? "0 0 6px rgba(167,139,250,0.7)" : "none" }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <span style={{ fontSize: "13px", fontWeight: "600", color: isActive ? "#c4b5fd" : "#e2e8f0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>{item.name}</span>
+                            <span style={{ fontSize: "11px", color: "#4b5563", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>{item.tagline}</span>
                           </div>
-
-                          {/* Loaded badge or delete icon */}
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-                            {isActive && (
-                              <span style={{
-                                fontSize: "10px", fontWeight: "600", color: "#a78bfa",
-                                backgroundColor: "rgba(139,92,246,0.15)",
-                                border: "1px solid rgba(139,92,246,0.25)",
-                                padding: "2px 7px", borderRadius: "20px",
-                                letterSpacing: "0.04em",
-                              }}>active</span>
-                            )}
-                            <button
-                              onClick={e => { e.stopPropagation(); handleDelete(item.id); }}
-                              title="Delete"
-                              style={{
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                width: "22px", height: "22px",
-                                background: "none", border: "none",
-                                borderRadius: "6px", cursor: "pointer",
-                                color: "#374151",
-                                transition: "color 0.15s, background-color 0.15s",
-                                padding: 0,
-                              }}
-                              onMouseOver={e => { e.currentTarget.style.color = "#f87171"; e.currentTarget.style.backgroundColor = "rgba(248,113,113,0.1)"; }}
-                              onMouseOut={e => { e.currentTarget.style.color = "#374151"; e.currentTarget.style.backgroundColor = "transparent"; }}
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                                <path d="M10 11v6M14 11v6" />
-                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                              </svg>
-                            </button>
+                          <div style={{ flexShrink: 0, display: "flex", gap: 6, alignItems: "center" }}>
+                            {isActive && <span style={{ fontSize: "10px", color: "#a78bfa", background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.25)", padding: "1px 7px", borderRadius: "12px" }}>Active</span>}
+                            <button onClick={e => { e.stopPropagation(); handleDelete(item.id); }}
+                              style={{ background: "none", border: "none", color: "#374151", cursor: "pointer", fontSize: "14px", padding: "0 2px", lineHeight: 1 }}
+                              onMouseOver={e => (e.currentTarget.style.color = "#f87171")}
+                              onMouseOut={e => (e.currentTarget.style.color = "#374151")}
+                            >×</button>
                           </div>
                         </div>
                       );
@@ -3706,161 +3930,36 @@ export default function App() {
                 )}
               </div>
             </div>
-
-            {/* Tip box */}
-            <div style={{
-              backgroundColor: "rgba(124,58,237,0.07)",
-              border: "1px solid rgba(124,58,237,0.18)",
-              borderRadius: "12px",
-              padding: "14px 16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-            }}>
-              <div style={{ fontSize: "11px", fontWeight: "600", color: "#a78bfa", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Pro tip
-              </div>
-              <div style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.65" }}>
-                Include your <strong style={{ color: "#9ca3af" }}>location</strong>, <strong style={{ color: "#9ca3af" }}>target customers</strong>, and the <strong style={{ color: "#9ca3af" }}>problem you solve</strong> for a sharper result.
-              </div>
-            </div>
-
-            {/* Social proof */}
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "12px 14px",
-              backgroundColor: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: "10px",
-            }}>
-              <div style={{ display: "flex" }}>
-                {["#f97316", "#8b5cf6", "#06b6d4", "#22c55e"].map((c, i) => (
-                  <div key={i} style={{
-                    width: "22px", height: "22px", borderRadius: "50%",
-                    backgroundColor: c, border: "2px solid #06060e",
-                    marginLeft: i > 0 ? "-7px" : 0,
-                    opacity: 0.85,
-                  }} />
-                ))}
-              </div>
-              <div style={{ fontSize: "12px", color: "#6b7280", lineHeight: "1.5" }}>
-                <span style={{ color: "#9ca3af", fontWeight: "600" }}>1,200+ businesses</span> generated this month
-              </div>
-            </div>
           </div>
 
-          {/* RIGHT PANEL */}
-          <div style={{
-            overflowY: "auto",
-            backgroundColor: "transparent",
-            padding: "40px 48px",
-          }}>
-
-            {/* Empty state */}
-            {!result && !loading && (
-              <div style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "20px",
-                animation: "fadeSlideUp 0.5s ease",
-              }}>
-                <div style={{
-                  width: "80px", height: "80px",
-                  borderRadius: "24px",
-                  background: "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(79,70,229,0.1))",
-                  border: "1px solid rgba(139,92,246,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "34px",
-                  boxShadow: "0 8px 32px rgba(124,58,237,0.1)",
-                }}>🏢</div>
-                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ fontSize: "16px", fontWeight: "600", color: "#4b5563" }}>Your business awaits</div>
-                  <div style={{ fontSize: "13px", color: "#374151", lineHeight: "1.6" }}>
-                    Type your idea on the left, then generate your website below.
-                  </div>
-                </div>
-                <button
-                  className="gen-btn"
-                  onClick={generateBusiness}
-                  disabled={loading || !idea.trim()}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    gap: "8px",
-                    padding: "13px 28px",
-                    background: !idea.trim()
-                      ? "rgba(124,58,237,0.15)"
-                      : "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                    color: !idea.trim() ? "#6b7280" : "#fff",
-                    border: "1px solid rgba(139,92,246,0.3)",
-                    borderRadius: "12px",
-                    fontSize: "14px", fontWeight: "600",
-                    cursor: !idea.trim() ? "not-allowed" : "pointer",
-                    letterSpacing: "0.02em",
-                    boxShadow: !idea.trim() ? "none" : "0 4px 20px rgba(124,58,237,0.35)",
-                    transition: "all 0.2s",
-                    opacity: !idea.trim() ? 0.5 : 1,
-                  }}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 8v8M8 12h8" />
-                  </svg>
-                  Generate Website
-                </button>
-                <div style={{ display: "flex", gap: "24px" }}>
-                  {[["🚀","Launch-ready"], ["🎨","Branded"], ["📦","Products included"]].map(([icon, label]) => (
-                    <div key={label} style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "4px", opacity: 0.35 }}>
-                      <span style={{ fontSize: "20px" }}>{icon}</span>
-                      <span style={{ fontSize: "11px", color: "#6b7280", fontWeight: "500" }}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
+          {/* RIGHT PANEL — result */}
+          <div style={{ overflowY: "auto", backgroundColor: "rgba(6,6,14,0.3)" }}>
             {/* Loading state */}
             {loading && (
               <div style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "28px",
+                height: "100%", display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center", gap: "28px",
                 animation: "fadeSlideUp 0.4s ease",
               }}>
                 <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <div style={{ fontSize: "15px", fontWeight: "600", color: "#9ca3af" }}>Building your business</div>
                   <div style={{ fontSize: "13px", color: "#4b5563" }}>This takes about 10–15 seconds</div>
                 </div>
-
                 {!showSkeleton ? (
                   <div style={{ width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column", gap: "10px" }}>
                     {LOADING_STEPS.slice(0, loadStep + 1).map((step, i) => (
                       <div key={i} style={{
-                        display: "flex", alignItems: "center", gap: "12px",
-                        padding: "11px 16px",
+                        display: "flex", alignItems: "center", gap: "12px", padding: "11px 16px",
                         borderRadius: "12px",
-                        background: i === loadStep
-                          ? "rgba(139,92,246,0.1)"
-                          : "rgba(255,255,255,0.02)",
-                        border: i === loadStep
-                          ? "1px solid rgba(139,92,246,0.25)"
-                          : "1px solid rgba(255,255,255,0.05)",
+                        background: i === loadStep ? "rgba(139,92,246,0.1)" : "rgba(255,255,255,0.02)",
+                        border: i === loadStep ? "1px solid rgba(139,92,246,0.25)" : "1px solid rgba(255,255,255,0.05)",
                         animation: "stepIn 0.35s ease",
-                        transition: "all 0.3s",
                       }}>
                         <span style={{ fontSize: "18px", lineHeight: 1 }}>{step.icon}</span>
                         <span style={{ fontSize: "13px", fontWeight: "500", color: i === loadStep ? "#e2e8f0" : "#4b5563", flex: 1 }}>{step.text}</span>
                         {i < loadStep
                           ? <span style={{ fontSize: "13px", color: "#22c55e" }}>✓</span>
-                          : <div style={{ width: "10px", height: "10px", borderRadius: "50%", border: "2px solid rgba(139,92,246,0.4)", borderTop: "2px solid #a78bfa", animation: "spin 0.8s linear infinite", flexShrink: 0 }} />
-                        }
+                          : <div style={{ width: "10px", height: "10px", borderRadius: "50%", border: "2px solid rgba(139,92,246,0.4)", borderTop: "2px solid #a78bfa", animation: "spin 0.8s linear infinite", flexShrink: 0 }} />}
                       </div>
                     ))}
                   </div>
@@ -3884,7 +3983,7 @@ export default function App() {
             {result && !loading && (
               <WebsitePreview
                 data={result}
-                onGenerateAnother={() => { setResult(null); setActiveId(null); }}
+                onGenerateAnother={() => { setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
                 user={user}
                 styleConfig={styleConfig}
                 onSignIn={handleSignIn}
@@ -3900,7 +3999,7 @@ export default function App() {
           step={launchStep}
           progress={launchProgress}
           error={launchError}
-          onRetry={handleOneLaunch}
+          onRetry={() => idea && handleOneLaunchWithIdea(idea)}
           onDismiss={() => { setLaunchError(null); setLaunchLoading(false); }}
         />
       )}
@@ -3911,7 +4010,7 @@ export default function App() {
           data={launchResult.data}
           deployedUrl={launchResult.deployedUrl}
           onClose={() => setLaunchResult(null)}
-          onLaunchAnother={() => { setLaunchResult(null); setResult(null); setActiveId(null); setIdea(""); }}
+          onLaunchAnother={() => { setLaunchResult(null); setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
         />
       )}
     </>
