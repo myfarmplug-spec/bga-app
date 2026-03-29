@@ -3609,8 +3609,11 @@ export default function App() {
       await new Promise(r => setTimeout(r, 900));
       setLaunchProgress(84);
       setLaunchStep(6); sound.tick(); haptic.step();
-      const deployRes = await axios.post(`${API_URL}/api/deploy`, { businessId: data.businessId });
-      const deployedUrl = deployRes.data.url;
+      let deployedUrl = null;
+      if (data.businessId) {
+        const deployRes = await axios.post(`${API_URL}/api/deploy`, { businessId: data.businessId });
+        deployedUrl = deployRes.data.url;
+      }
       setLaunchProgress(100);
       sound.success(); haptic.success();
       _incDailyCount();
