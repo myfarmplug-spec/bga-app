@@ -767,7 +767,7 @@ function LaunchExperience({ step, progress, error, onRetry, onDismiss }) {
 }
 
 // ── Launch success screen ──────────────────────────────────────────────────────
-function LaunchSuccessScreen({ data, deployedUrl, onClose, onLaunchAnother }) {
+function LaunchSuccessScreen({ data, deployedUrl, onClose, onLaunchAnother, onSignIn }) {
   const flyerRef = useRef(null);
   const logoRef1 = useRef(null);
   const logoRef2 = useRef(null);
@@ -885,62 +885,90 @@ function LaunchSuccessScreen({ data, deployedUrl, onClose, onLaunchAnother }) {
         </div>
 
         {/* Live URL */}
-        <div style={{
-          borderRadius: "18px", overflow: "hidden",
-          border: "1px solid rgba(34,197,94,0.25)",
-          animation: "successGlow 4s ease-in-out infinite",
-        }}>
+        {deployedUrl ? (
           <div style={{
-            padding: "15px 20px",
-            background: "linear-gradient(135deg, rgba(34,197,94,0.1), rgba(16,185,129,0.06))",
-            borderBottom: "1px solid rgba(34,197,94,0.15)",
-            display: "flex", alignItems: "center", gap: "10px",
+            borderRadius: "18px", overflow: "hidden",
+            border: "1px solid rgba(34,197,94,0.25)",
+            animation: "successGlow 4s ease-in-out infinite",
           }}>
             <div style={{
-              width: "8px", height: "8px", borderRadius: "50%", flexShrink: 0,
-              background: "#22c55e", boxShadow: "0 0 8px rgba(34,197,94,0.8)",
-              animation: "pulse 2s infinite",
-            }} />
-            <span style={{ fontSize: "12px", color: "#86efac", flex: 1, fontFamily: "monospace", wordBreak: "break-all" }}>
-              {deployedUrl}
-            </span>
+              padding: "15px 20px",
+              background: "linear-gradient(135deg, rgba(34,197,94,0.1), rgba(16,185,129,0.06))",
+              borderBottom: "1px solid rgba(34,197,94,0.15)",
+              display: "flex", alignItems: "center", gap: "10px",
+            }}>
+              <div style={{
+                width: "8px", height: "8px", borderRadius: "50%", flexShrink: 0,
+                background: "#22c55e", boxShadow: "0 0 8px rgba(34,197,94,0.8)",
+                animation: "pulse 2s infinite",
+              }} />
+              <span style={{ fontSize: "12px", color: "#86efac", flex: 1, fontFamily: "monospace", wordBreak: "break-all" }}>
+                {deployedUrl}
+              </span>
+            </div>
+            <div style={{
+              display: "grid", gridTemplateColumns: "1fr 1fr",
+              padding: "12px 14px", gap: "10px",
+              background: "rgba(0,0,0,0.3)",
+            }}>
+              <a
+                href={deployedUrl} target="_blank" rel="noreferrer"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                  padding: "11px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                  color: "#fff", borderRadius: "10px",
+                  fontSize: "13px", fontWeight: "600", textDecoration: "none",
+                  boxShadow: "0 4px 16px rgba(79,70,229,0.35)",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+                Open Website
+              </a>
+              <button
+                onClick={() => { navigator.clipboard.writeText(deployedUrl).then(() => { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }); }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                  padding: "11px",
+                  background: linkCopied ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.05)",
+                  color: linkCopied ? "#4ade80" : "#9ca3af",
+                  border: linkCopied ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "10px", fontSize: "13px", fontWeight: "600", cursor: "pointer", transition: "all 0.2s",
+                }}
+              >
+                {linkCopied ? "✓ Copied!" : "Copy Link"}
+              </button>
+            </div>
           </div>
+        ) : (
           <div style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr",
-            padding: "12px 14px", gap: "10px",
-            background: "rgba(0,0,0,0.3)",
+            borderRadius: "18px", overflow: "hidden",
+            border: "1px solid rgba(139,92,246,0.3)",
+            background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(79,70,229,0.04))",
           }}>
-            <a
-              href={deployedUrl} target="_blank" rel="noreferrer"
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-                padding: "11px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                color: "#fff", borderRadius: "10px",
-                fontSize: "13px", fontWeight: "600", textDecoration: "none",
-                boxShadow: "0 4px 16px rgba(79,70,229,0.35)",
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-              Open Website
-            </a>
-            <button
-              onClick={() => { navigator.clipboard.writeText(deployedUrl).then(() => { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }); }}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-                padding: "11px",
-                background: linkCopied ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.05)",
-                color: linkCopied ? "#4ade80" : "#9ca3af",
-                border: linkCopied ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "10px", fontSize: "13px", fontWeight: "600", cursor: "pointer", transition: "all 0.2s",
-              }}
-            >
-              {linkCopied ? "✓ Copied!" : "Copy Link"}
-            </button>
+            <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ fontSize: "13px", color: "#a78bfa", fontWeight: "600" }}>
+                Sign in to publish your live website
+              </div>
+              <div style={{ fontSize: "12px", color: "#6b7280", lineHeight: 1.6 }}>
+                Create a free account to get a shareable link, save your business, and access your dashboard.
+              </div>
+              <button
+                onClick={() => { onClose(); if (onSignIn) onSignIn(); }}
+                style={{
+                  padding: "12px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                  color: "#fff", border: "none", borderRadius: "10px",
+                  fontSize: "13px", fontWeight: "700", cursor: "pointer",
+                  boxShadow: "0 4px 16px rgba(79,70,229,0.35)",
+                }}
+              >
+                Sign up free — get your live link
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Flyer */}
         <div style={{
@@ -3708,6 +3736,7 @@ export default function App() {
             deployedUrl={launchResult.deployedUrl}
             onClose={() => setLaunchResult(null)}
             onLaunchAnother={() => { setLaunchResult(null); setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
+            onSignIn={() => { setLaunchResult(null); setAuthModal(true); }}
           />
         )}
       </>
@@ -4014,6 +4043,7 @@ export default function App() {
           deployedUrl={launchResult.deployedUrl}
           onClose={() => setLaunchResult(null)}
           onLaunchAnother={() => { setLaunchResult(null); setResult(null); setActiveId(null); setIdea(""); setSelectedCategory(null); }}
+          onSignIn={() => { setLaunchResult(null); setAuthModal(true); }}
         />
       )}
     </>
