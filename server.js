@@ -1,11 +1,8 @@
 
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-import dotenv from "dotenv";
-dotenv.config();
+
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import fetch from "node-fetch";
 import rateLimit from "express-rate-limit";
 import supabase from "./supabase.js";
@@ -16,9 +13,12 @@ import styleRoute    from "./routes/style.js";
 import emailsRoute   from "./routes/emails.js";
 import upgradeRoute  from "./routes/upgrade.js";
 
+dotenv.config();
+
 const app = express();
 
-// ── Middleware (MUST be before all routes) ───────────────────────────────────
+const PORT = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
@@ -32,6 +32,10 @@ const generateLimiter = rateLimit({
 });
 app.use("/api/generate", generateLimiter);
 app.use("/api/emails",   generateLimiter);
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 // --- DOMAIN MARK LIVE (PAID) ---
 app.post("/api/domain/mark-live", async (req, res) => {
