@@ -3207,182 +3207,90 @@ function OnboardingScreen({ profile, user, onLaunch, onPreview, onSignIn }) {
 
   return (
     <div style={{
-      minHeight: "100vh", backgroundColor: "#f6f7f8", color: "#111827",
+      minHeight: "100vh", backgroundColor: "#000", color: "#fff",
       fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
       display: "flex", flexDirection: "column",
     }}>
-      {/* Top bar */}
-      <div style={{
-        height: 56, padding: "0 20px", display: "flex", alignItems: "center",
-        justifyContent: "space-between", backgroundColor: "#fff",
-        borderBottom: "1px solid #e5e7eb",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900, color: "#fff" }}>B</div>
-          <span style={{ fontSize: 15, fontWeight: 800, color: "#111827" }}>BGA</span>
-          <span style={{ fontSize: 12, color: "#9ca3af", marginLeft: 2 }}>Business Generator Africa</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {user ? (
-            <>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: "#fff" }}>
-                {(profile?.name || user.email || "?")[0].toUpperCase()}
-              </div>
-              <span style={{ fontSize: 13, color: "#111827", fontWeight: 600 }}>{profile?.name || user.email?.split("@")[0]}</span>
-              <a href="/dashboard" style={{ fontSize: 12, color: "#16a34a", textDecoration: "none", padding: "4px 12px", border: "1px solid #bbf7d0", borderRadius: 20, fontWeight: 600 }}>Dashboard</a>
-            </>
-          ) : (
-            <button onClick={onSignIn} style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "#16a34a", border: "none", padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>Sign In</button>
-          )}
-        </div>
+      {/* Nav */}
+      <div style={{ padding: "16px 20px", display: "flex", justifyContent: "flex-end" }}>
+        {user ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 13, color: "#9ca3af" }}>{profile?.name || user.email?.split("@")[0]}</span>
+            <a href="/dashboard" style={{ fontSize: 13, color: "#fff", textDecoration: "none", padding: "6px 14px", border: "1px solid #374151", borderRadius: 8, fontWeight: 500 }}>Dashboard</a>
+          </div>
+        ) : (
+          <button onClick={onSignIn} style={{ fontSize: 13, fontWeight: 600, color: "#fff", background: "transparent", border: "1px solid #374151", padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit" }}>Sign In</button>
+        )}
       </div>
 
       {/* Main */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px 20px 48px" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px 60px" }}>
+        <div style={{ width: "100%", maxWidth: 560, textAlign: "center" }}>
 
-        {/* Heading */}
-        <div style={{ textAlign: "center", marginBottom: 32, maxWidth: 520 }}>
-          <div style={{ fontSize: "clamp(24px, 7vw, 38px)", fontWeight: 900, color: "#111827", letterSpacing: "-0.03em", lineHeight: 1.15, marginBottom: 10 }}>
-            {greeting}
-          </div>
-          <div style={{ fontSize: 15, color: "#6b7280", lineHeight: 1.65 }}>
-            {subtext}
-          </div>
-        </div>
+          <h1 style={{ fontSize: "clamp(28px, 8vw, 42px)", fontWeight: 700, lineHeight: 1.2, marginBottom: 12, letterSpacing: "-0.02em" }}>
+            {profile?.name ? `Welcome back, ${profile.name}` : "What business do you want to build?"}
+          </h1>
 
-        {/* Category grid */}
-        {!selected && !custom && (
-          <div style={{ width: "100%", maxWidth: 520 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-              {QUICK_START_CATEGORIES.map(cat => (
-                <button key={cat.label} type="button" onClick={() => pickCategory(cat)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 12,
-                    padding: "15px 16px", borderRadius: 12, fontFamily: "inherit",
-                    border: "1.5px solid #e5e7eb", background: "#fff",
-                    color: "#111827", fontSize: 14, fontWeight: 600,
-                    cursor: "pointer", textAlign: "left", transition: "all 0.15s",
-                  }}
-                  onMouseOver={e => { e.currentTarget.style.borderColor = "#16a34a"; e.currentTarget.style.background = "#f0fdf4"; }}
-                  onMouseOut={e => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.background = "#fff"; }}
-                >
-                  <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
-                  <span>{cat.label}</span>
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={() => { setCustom(true); setSelected("custom"); setIdea(""); }}
+          <p style={{ fontSize: 16, color: "#9ca3af", marginBottom: 28, lineHeight: 1.6 }}>
+            One prompt. AI creates your business instantly.
+          </p>
+
+          <input
+            type="text"
+            placeholder="e.g. shawarma spot in Port Harcourt"
+            value={idea}
+            onChange={e => setIdea(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && idea.trim() && (user ? handleLaunch() : onSignIn())}
+            style={{
+              width: "100%", padding: "16px 18px", borderRadius: 10, boxSizing: "border-box",
+              background: "#111", border: "1px solid #374151",
+              color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit",
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={user ? handleLaunch : onSignIn}
+            disabled={launching || !idea.trim()}
+            style={{
+              width: "100%", marginTop: 12, padding: "16px", borderRadius: 10,
+              background: launching || !idea.trim() ? "#1a1a1a" : "#2563eb",
+              color: launching || !idea.trim() ? "#4b5563" : "#fff",
+              fontSize: 15, fontWeight: 600, border: "none",
+              cursor: launching || !idea.trim() ? "not-allowed" : "pointer",
+              fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              transition: "background 0.15s",
+            }}
+          >
+            {launching
+              ? <><div style={{ width: 15, height: 15, border: "2px solid #374151", borderTop: "2px solid #6b7280", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} /> Building your business…</>
+              : !user
+              ? "Sign In & Generate Business →"
+              : "Generate Business →"}
+          </button>
+
+          {user && !launching && idea.trim() && (
+            <button type="button" onClick={handlePreview}
               style={{
-                width: "100%", marginTop: 10, padding: "13px 16px", borderRadius: 12, fontFamily: "inherit",
-                border: "1.5px dashed #d1d5db", background: "transparent",
-                color: "#6b7280", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
-              }}
-              onMouseOver={e => { e.currentTarget.style.borderColor = "#16a34a"; e.currentTarget.style.color = "#15803d"; }}
-              onMouseOut={e => { e.currentTarget.style.borderColor = "#d1d5db"; e.currentTarget.style.color = "#6b7280"; }}
-            >
-              ✏️ Something else — describe your own idea
-            </button>
-          </div>
-        )}
-
-        {/* Selected category + editable prompt */}
-        {(selected || custom) && (
-          <div style={{ width: "100%", maxWidth: 520, display: "flex", flexDirection: "column", gap: 12 }}>
-            {/* Back */}
-            <button type="button" onClick={() => { setSelected(null); setCustom(false); setIdea(""); }}
-              style={{
-                alignSelf: "flex-start", background: "none", border: "none",
+                width: "100%", marginTop: 8, padding: "12px", borderRadius: 10,
+                background: "transparent", border: "1px solid #1f2937",
                 color: "#6b7280", fontSize: 13, cursor: "pointer", fontFamily: "inherit",
-                display: "flex", alignItems: "center", gap: 5, padding: 0,
-              }}>
-              ← Back
-            </button>
-
-            {/* Selected badge */}
-            {selected && selected !== "custom" && (() => {
-              const cat = QUICK_START_CATEGORIES.find(c => c.label === selected);
-              return cat ? (
-                <div style={{
-                  display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 14px",
-                  borderRadius: 20, background: "#f0fdf4", border: "1px solid #bbf7d0",
-                  fontSize: 13, fontWeight: 600, color: "#15803d", alignSelf: "flex-start",
-                }}>
-                  <span>{cat.emoji}</span><span>{cat.label}</span>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-              ) : null;
-            })()}
-
-            {/* Editable textarea */}
-            <textarea
-              autoFocus
-              rows={4}
-              style={{
-                width: "100%", padding: "14px 16px", borderRadius: 12, boxSizing: "border-box",
-                border: "1.5px solid #16a34a", background: "#fff",
-                color: "#111827", fontSize: 14, lineHeight: 1.65, resize: "none",
-                outline: "none", fontFamily: "inherit",
-                boxShadow: "0 0 0 3px rgba(22,163,74,0.1)",
+                transition: "all 0.15s",
               }}
-              placeholder={custom ? "Describe your business idea, product, or target market…" : "Edit your idea or just launch it as-is…"}
-              value={idea}
-              onChange={e => setIdea(e.target.value)}
-            />
-            <div style={{ fontSize: 12, color: "#9ca3af" }}>
-              {custom ? "Describe clearly for best results" : "Looks good? Just hit Launch →"}
-            </div>
-          </div>
-        )}
-
-        {/* Launch button */}
-        {(selected || custom || idea.trim()) && (
-          <div style={{ width: "100%", maxWidth: 520, marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-            <button
-              type="button"
-              onClick={user ? handleLaunch : onSignIn}
-              disabled={launching || !idea.trim()}
-              style={{
-                width: "100%", padding: "17px 24px", borderRadius: 12, border: "none", fontFamily: "inherit",
-                background: launching || !idea.trim()
-                  ? "#d1fae5"
-                  : "#16a34a",
-                color: launching || !idea.trim() ? "#6b7280" : "#fff",
-                fontSize: 16, fontWeight: 800,
-                cursor: launching || !idea.trim() ? "not-allowed" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                transition: "all 0.2s",
-              }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = "#374151"; e.currentTarget.style.color = "#9ca3af"; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = "#1f2937"; e.currentTarget.style.color = "#6b7280"; }}
             >
-              {launching
-                ? <><div style={{ width: 16, height: 16, border: "2.5px solid rgba(0,0,0,0.15)", borderTop: "2.5px solid #16a34a", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />Building your business…</>
-                : !user
-                ? <>🔒 Sign In &amp; Launch My Business</>
-                : <>🚀 Launch My Business</>}
+              Preview only (no deploy)
             </button>
+          )}
 
-            {user && !launching && idea.trim() && (
-              <button type="button" onClick={handlePreview}
-                style={{
-                  width: "100%", padding: "12px", borderRadius: 10, fontFamily: "inherit",
-                  border: "1.5px solid #e5e7eb", background: "#fff",
-                  color: "#6b7280", fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s",
-                }}
-                onMouseOver={e => { e.currentTarget.style.borderColor = "#16a34a"; e.currentTarget.style.color = "#15803d"; }}
-                onMouseOut={e => { e.currentTarget.style.borderColor = "#e5e7eb"; e.currentTarget.style.color = "#6b7280"; }}
-              >
-                Preview only (no deploy)
-              </button>
-            )}
+          <div style={{ display: "flex", gap: 24, marginTop: 32, justifyContent: "center", flexWrap: "wrap" }}>
+            {[["⚡","Instant results"], ["🌍","Africa-focused AI"], ["🔒","Private & secure"]].map(([icon, label]) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#4b5563" }}>
+                <span>{icon}</span><span>{label}</span>
+              </div>
+            ))}
           </div>
-        )}
-
-        {/* Trust strip */}
-        <div style={{ display: "flex", gap: 20, marginTop: 36, flexWrap: "wrap", justifyContent: "center" }}>
-          {[["⚡","Instant results"], ["🌍","Africa-focused AI"], ["🔒","Private & secure"]].map(([icon, label]) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#9ca3af" }}>
-              <span style={{ fontSize: 14 }}>{icon}</span><span>{label}</span>
-            </div>
-          ))}
         </div>
       </div>
     </div>
