@@ -48,13 +48,14 @@ class ErrorBoundary extends Component {
 }
 
 const path = window.location.pathname;
-const isHome = path === '/' || path === '';
+const isHome      = path === '/' || path === '';
 const isDashboard = path === '/dashboard';
+const isSite      = path.startsWith('/site/');
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      {isDashboard ? <Dashboard /> : isHome ? <App /> : <BusinessPage />}
+      {isSite ? <BusinessPage /> : isDashboard ? <Dashboard /> : isHome ? <App /> : <App />}
     </ErrorBoundary>
   </StrictMode>
 );

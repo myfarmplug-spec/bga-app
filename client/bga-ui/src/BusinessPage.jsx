@@ -7,7 +7,9 @@ export default function BusinessPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const id = window.location.pathname.replace(/^\//, "");
+    // Supports both /site/{id} and legacy /{id}
+    const parts = window.location.pathname.replace(/^\//, "").split("/");
+    const id = parts[0] === "site" ? parts[1] : parts[0];
     if (!id) { setNotFound(true); setLoading(false); return; }
 
     // Query the public view — no user_id, no memory, no internal fields exposed

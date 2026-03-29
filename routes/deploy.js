@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
 
   // FRONTEND_URL = where the React app lives (Vercel / perfectsand.com)
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const url = `${frontendUrl}/${businessId}`;
+  const url = `${frontendUrl}/site/${businessId}`;
 
   console.log(`[deploy] Marking business ${businessId} as deployed → ${url}`);
 
